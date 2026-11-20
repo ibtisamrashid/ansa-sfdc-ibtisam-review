@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <classAccesses><apexClass>SequenceHubController</apexClass><enabled>true</enabled></classAccesses>
+    <classAccesses><apexClass>SequenceUploadController</apexClass><enabled>true</enabled></classAccesses>
+    <classAccesses><apexClass>CodonController</apexClass><enabled>true</enabled></classAccesses>
+    <classAccesses><apexClass>SequenceHubActions</apexClass><enabled>true</enabled></classAccesses>
+    <classAccesses><apexClass>SequenceHubAnnotation</apexClass><enabled>true</enabled></classAccesses>
+    <description>Read and upload account sequences in Sequence Hub. Does not change cart or quote permissions.</description>
+    <fieldPermissions><editable>false</editable><field>Sequence__c.Complexity__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>false</editable><field>Sequence__c.Complexity_Score__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>false</editable><field>Sequence__c.Feasibility_Classifier__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>false</editable><field>Sequence__c.Feasibility_Explained__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>false</editable><field>Sequence__c.Sequence_Error__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>false</editable><field>Sequence__c.Sequence_Length__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>false</editable><field>Sequence__c.Sequence__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>false</editable><field>Sequence__c.Product_SKU__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>false</editable><field>Sequence__c.Quote_Line_Item__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>false</editable><field>Sequence__c.Vector__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>false</editable><field>Sequence__c.Sequence_Account__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>false</editable><field>Amino_Acid__c.Amino_Acid_Sequence__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>false</editable><field>Amino_Acid__c.Model__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>false</editable><field>Amino_Acid__c.Flanking_Sequence_5__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>false</editable><field>Amino_Acid__c.Flanking_Sequence_3__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>false</editable><field>Amino_Acid__c.Target_Organism__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>false</editable><field>Amino_Acid__c.Related_Sequence__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>false</editable><field>Sequence__c.Order_Product__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>false</editable><field>Sequence__c.Manual_Annotations__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>false</editable><field>Sequence__c.Plannotate_Features__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>false</editable><field>Sequence__c.Plannotate_Status__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>false</editable><field>Sequence__c.Plannotate_Sequence_Hash__c</field><readable>true</readable></fieldPermissions>
+    <label>Sequence Hub User</label>
+    <objectPermissions><allowCreate>false</allowCreate><allowDelete>false</allowDelete><allowEdit>false</allowEdit><allowRead>true</allowRead><modifyAllRecords>false</modifyAllRecords><object>Sequence__c</object><viewAllRecords>false</viewAllRecords></objectPermissions>
+    <objectPermissions><allowCreate>false</allowCreate><allowDelete>false</allowDelete><allowEdit>false</allowEdit><allowRead>true</allowRead><modifyAllRecords>false</modifyAllRecords><object>Amino_Acid__c</object><viewAllRecords>false</viewAllRecords></objectPermissions>
+    <objectPermissions><allowCreate>false</allowCreate><allowDelete>false</allowDelete><allowEdit>false</allowEdit><allowRead>true</allowRead><modifyAllRecords>false</modifyAllRecords><object>Vector__c</object><viewAllRecords>false</viewAllRecords></objectPermissions>
+    <objectPermissions><allowCreate>false</allowCreate><allowDelete>false</allowDelete><allowEdit>false</allowEdit><allowRead>true</allowRead><modifyAllRecords>false</modifyAllRecords><object>Target_Organism__c</object><viewAllRecords>false</viewAllRecords></objectPermissions>
+    <objectPermissions><allowCreate>false</allowCreate><allowDelete>false</allowDelete><allowEdit>false</allowEdit><allowRead>true</allowRead><modifyAllRecords>false</modifyAllRecords><object>Account</object><viewAllRecords>false</viewAllRecords></objectPermissions>
+</PermissionSet>

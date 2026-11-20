@@ -1,0 +1,446 @@
+<template>
+    <div class="detail-page">
+        <template if:true={showOrderPlacedBanner}>
+            <div class="order-placed-banner" role="status">
+                <p class="order-placed-banner-text">Your order has been placed.</p>
+                <button class="order-placed-banner-dismiss" type="button" title="Dismiss" aria-label="Dismiss"
+                    onclick={handleDismissOrderPlacedBanner}>
+                    ×
+                </button>
+            </div>
+        </template>
+
+        <header class="page-header">
+            <div class="title-row">
+                <h1 class="title">Ansa Order Number: {orderHeader.orderNumber}</h1>
+                <template if:false={orderHeaderReady}>
+                    <span class="status-pill status-pill-loading" aria-live="polite">Loading…</span>
+                </template>
+                <template if:true={orderHeaderReady}>
+                    <span class={statusClass}>{statusLabel}</span>
+                </template>
+            </div>
+        </header>
+
+        <section class="meta-grid" aria-label="Order information">
+            <div class="meta-row meta-row-hero">
+                <div class="meta-field-stack meta-field-stack-hero">
+                    <div class="meta-label meta-label-primary">Requestor</div>
+                    <div class="meta-value hero">{orderHeader.requestor}</div>
+                </div>
+                <div class="meta-field-stack meta-field-stack-hero">
+                    <div class="meta-label meta-label-primary">Order placed</div>
+                    <div class="meta-value hero">{orderHeader.orderPlaced}</div>
+                </div>
+                <div class="meta-cell-empty" aria-hidden="true"></div>
+            </div>
+
+            <div class="meta-row meta-row-commerce">
+                <div class="meta-field-stack">
+                    <div class="meta-label meta-label-secondary">Payment method</div>
+                    <div class="meta-value field">{orderHeader.paymentMethod}</div>
+                </div>
+                <div class="meta-field-stack">
+                    <div class="meta-label meta-label-secondary">PO number</div>
+                    <div class="meta-value field">{orderHeader.poNumber}</div>
+                </div>
+                <div class="meta-side-col">
+                    <label class={taxExemptRowClass}>
+                        <input type="checkbox" checked={orderHeader.taxExempt} disabled={isTaxExemptDisabled}
+                            onchange={handleTaxExemptChange} />
+                        <span>Tax exempt</span>
+                    </label>
+                    <label class={acceptPartialRowClass}>
+                        <input type="checkbox" checked={orderHeader.acceptPartial} disabled={isAcceptPartialDisabled}
+                            onchange={handleAcceptPartialChange} />
+                        <span>I accept partial shipments.</span>
+                        <span class="order-partial-learn-wrap">
+                            <a href="#" class="order-partial-link" onclick={handlePartialShipmentLearnMore}>Learn more</a>
+                            <template if:true={showPartialShipmentTooltip}>
+                                <div class="order-partial-tooltip-popover" role="tooltip">
+                                    <div class="order-partial-tooltip-arrow" aria-hidden="true"></div>
+                                    By accepting partial shipments, you agree to be charged a separate shipping fee for each shipment dispatched. Partial shipments won't affect your assigned AOTG date, but you agree to let us split and invoice your AOTG order if a partial shipment occurs. Orders are invoiced upon shipment.
+                                </div>
+                            </template>
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="meta-row meta-row-shipping">
+                <div class="meta-field-stack">
+                    <div class="meta-label meta-label-secondary">Shipping method</div>
+                    <div class="meta-value field">{orderHeader.shippingMethod}</div>
+                </div>
+                <div class="meta-field-stack">
+                    <div class="meta-label meta-label-secondary">INCO Terms</div>
+                    <div class="meta-value field">{orderHeader.incoTerms}</div>
+                </div>
+                <div class="meta-side-col meta-download-col">
+                    <button type="button" class="quote-download-link download-order-link" onclick={openDownloadModal}
+                        disabled={isOrderFilesButtonDisabled}
+                        title={orderFilesButtonTitle}>
+                        <c-abt-download-icon size="sm" alternative-text="Download"></c-abt-download-icon>
+                        DOWNLOAD ORDER FILES
+                    </button>
+                </div>
+            </div>
+
+            <div class="meta-row meta-row-addresses">
+                <div class="meta-field-stack meta-field-stack-address">
+                    <div class="meta-label meta-label-primary">Billing address</div>
+                    <div class="address-text">{orderHeader.billingAddress}</div>
+                </div>
+                <div class="meta-field-stack meta-field-stack-address">
+                    <div class="meta-label meta-label-primary">Shipping address</div>
+                    <div class="address-text">{orderHeader.shippingAddress}</div>
+                </div>
+                <div class="meta-cell-empty" aria-hidden="true"></div>
+            </div>
+        </section>
+
+        <section class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th class="cell-quote-id">Quote ID</th>
+                        <th>Product</th>
+                        <th>Name</th>
+                        <th class="order-th-tooltip">
+                            <c-abt-table-header-tooltip label="Feasibility" wide="true">
+                                <p><strong>Guaranteed:</strong> We are confident we can synthesize your sequence and
+                                    are guaranteed to ship by the communicated date or its free.</p>
+                                <p><strong>Accepted:</strong> We are confident we can synthesize your sequence. These
+                                    sequences are not covered by the Ansa On-Time Guarantee.</p>
+                                <p><strong>Let's try:</strong> Your sequence is slightly outside our standard product
+                                    range or may be on the cutting edge of what can be synthesized, but we want to give
+                                    it a try! These sequences fall outside of the Ansa On-Time Guarantee program.</p>
+                                <p><strong>Not currently possible:</strong> Your sequence is outside Ansa's current
+                                    capabilities and cannot be accepted at this time.</p>
+                            </c-abt-table-header-tooltip>
+                        </th>
+                        <th>Status</th>
+                        <th class="order-th-tooltip">
+                            <c-abt-table-header-tooltip label="As Early As Date">
+                                <p>Your order could ship as early as this date — actual timing may vary.</p>
+                            </c-abt-table-header-tooltip>
+                        </th>
+                        <th class="order-th-tooltip order-th-guaranteed-date">
+                            <c-abt-table-header-tooltip label="Guaranteed Ship Date" wide="true">
+                                <p><strong>Guaranteed orders:</strong> your committed ship date, backed by Ansa's
+                                    on-time guarantee promise.</p>
+                                <p><strong>Let's Try orders:</strong> your estimated ship date.</p>
+                            </c-abt-table-header-tooltip>
+                        </th>
+                        <th class="order-th-tooltip">
+                            <c-abt-table-header-tooltip label="Total Price">
+                                <p>The sum of your unit price and any additional fees.</p>
+                            </c-abt-table-header-tooltip>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template if:true={hasOrderLines}>
+                        <template for:each={orderItems} for:item="row">
+                            <tr key={row.id}>
+                                <td class="cell-bold cell-quote-id" title={row.quoteId}>{row.quoteId}</td>
+                                <td class="cell-ellipsis" title={row.product}>{row.product}</td>
+                                <td class="cell-ellipsis" title={row.name}>{row.name}</td>
+                                <td class="cell-ellipsis" title={row.feasibility}>{row.feasibility}</td>
+                                <td class="cell-status">
+                                    <span class={row.statusClass}>{row.statusLabel}</span>
+                                </td>
+                                <td class="ship-date-cell">
+                                    <template if:true={row.showShipIcon}>
+                                        <template if:true={row.trackingUrl}>
+                                            <a href={row.trackingUrl} target="_blank" rel="noopener noreferrer"
+                                                class="ship-icon-link" title="Track shipment on FedEx">
+                                                <c-abt-track-shipment-icon size="xs"
+                                                    alternative-text="Track shipment on FedEx">
+                                                </c-abt-track-shipment-icon>
+                                            </a>
+                                        </template>
+                                        <template if:false={row.trackingUrl}>
+                                            <c-abt-track-shipment-icon size="xs" alternative-text="Shipped">
+                                            </c-abt-track-shipment-icon>
+                                        </template>
+                                    </template>
+                                    {row.expectedShipDate}
+                                </td>
+                                <td>{row.guaranteedDate}</td>
+                                <td>{row.totalPrice}</td>
+                            </tr>
+                        </template>
+                    </template>
+                    <template if:false={hasOrderLines}>
+                        <tr>
+                            <td colspan="8" class="empty-table-msg">
+                                Sequences for this order will appear here once line items are synced.
+                                If you just submitted checkout, data may take a moment to update.
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </section>
+
+        <div class="post-table-footer">
+            <div class="post-table-left">
+                <div class="below-actions">
+                    <button type="button" class="quote-download-link download-sequences"
+                        onclick={handleDownloadSequences}>
+                        <c-abt-download-icon size="sm" alternative-text="Download"></c-abt-download-icon>
+                        DOWNLOAD SEQUENCES
+                    </button>
+                    <template if:true={hasTrackingNumber}>
+                        <button type="button" class="quote-download-link track-shipment-link"
+                            onclick={handleTrackShipment}>
+                            <c-abt-track-shipment-icon size="sm" alternative-text="Track shipment">
+                            </c-abt-track-shipment-icon>
+                            Track Shipment
+                        </button>
+                    </template>
+                </div>
+
+                <section class="notes-wrap">
+                    <div class="meta-label meta-label-primary">Special Requests</div>
+                    <div class="notes-text">{orderHeader.notes}</div>
+                </section>
+            </div>
+
+            <div class="totals-box">
+                <div class="totals-line"><span>Subtotal:</span><span class="totals-amount">{orderHeader.subtotal}</span>
+                </div>
+                <div class="totals-line"><span>Shipping:</span><span
+                        class="totals-amount">{orderHeader.shippingAndPackaging}</span></div>
+                <div class="totals-line"><span>Discount:</span><span class="totals-amount">{orderHeader.discount}</span>
+                </div>
+                <div class="totals-line"><span>Tax:</span><span class="totals-amount">{orderHeader.tax}</span></div>
+                <div class="totals-total">
+                    <span>TOTAL:</span>
+                    <span class="totals-amount">{orderHeader.total}</span>
+                </div>
+            </div>
+        </div>
+
+        <section class="invoice-wrap">
+            <table class="invoice-table">
+                <thead>
+                    <tr>
+                        <th>Invoice #</th>
+                        <th>Amount (USD)</th>
+                        <th>Invoice Date</th>
+                        <th>Due Date</th>
+                        <th>Payment URL</th>
+                        <th>Status</th>
+                        <th class="download-col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template if:true={hasInvoices}>
+                        <template for:each={invoices} for:item="inv">
+                            <tr key={inv.id}>
+                                <td class="cell-bold">{inv.invoiceNumber}</td>
+                                <td>{inv.amount}</td>
+                                <td>{inv.invoiceDate}</td>
+                                <td>{inv.dueDate}</td>
+                                <td class="url-cell">
+                                    <template if:true={inv.hasPaymentUrl}>
+                                        <a href={inv.paymentUrl} target="_blank"
+                                            rel="noopener noreferrer">{inv.paymentUrl}</a>
+                                    </template>
+                                    <template if:false={inv.hasPaymentUrl}>
+                                        {inv.paymentUrl}
+                                    </template>
+                                </td>
+                                <td>{inv.status}</td>
+                                <td class="download-cell">
+                                    <button class="inline-icon-btn" data-url={inv.paymentUrl}
+                                        onclick={handleInvoiceDownload}>
+                                        <c-abt-download-icon size="sm"
+                                            alternative-text="Download"></c-abt-download-icon>
+                                    </button>
+                                </td>
+                            </tr>
+                        </template>
+                    </template>
+                    <template if:false={hasInvoices}>
+                        <tr>
+                            <td colspan="7" class="empty-table-msg">
+                                Invoices will be displayed when the order is shipped.
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </section>
+    </div>
+
+    <template if:true={isDownloadModalOpen}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open order-download-modal">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        title="Close" onclick={closeDownloadModal}>
+                        <lightning-icon icon-name="utility:close" size="small" alternative-text="close"
+                            class="slds-button__icon slds-button__icon_large"></lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 class="slds-text-heading_medium">Download Order Files</h2>
+                </header>
+
+                <div class="slds-modal__content slds-p-around_medium">
+                    <template if:true={showLoadingSpinner}>
+                        <div class="slds-text-align_center slds-p-around_large">
+                            <lightning-spinner alternative-text="Preparing download..."
+                                size="medium"></lightning-spinner>
+                            <div class="slds-text-body_regular slds-m-top_medium">
+                                {downloadProgressMessage}
+                            </div>
+                            <div class="slds-text-body_small slds-text-color_weak slds-m-top_small">
+                                This may take a moment. Please don't close this window.
+                            </div>
+                        </div>
+                    </template>
+
+                    <template if:true={showErrorMessage}>
+                        <div class="slds-text-align_center slds-p-around_large">
+                            <lightning-icon icon-name="utility:error" size="large" variant="error"></lightning-icon>
+                            <div class="slds-text-heading_small slds-m-top_medium slds-text-color_error">
+                                Download Error
+                            </div>
+                            <div class="slds-text-body_regular slds-m-top_medium slds-m-bottom_large">
+                                {downloadErrorMessage}
+                            </div>
+                            <lightning-button variant="brand" label="Try Again" onclick={tryAgainDownload}
+                                class="slds-m-right_small"></lightning-button>
+                            <lightning-button variant="neutral" label="Close"
+                                onclick={closeDownloadModal}></lightning-button>
+                        </div>
+                    </template>
+
+                    <template if:true={categorySelectionVisible}>
+                        <div class="slds-text-body_regular slds-m-bottom_large">
+                            Select a file category:
+                        </div>
+                        <div class="slds-grid slds-wrap slds-gutters_medium">
+                            <div class="slds-col slds-size_1-of-3">
+                                <div class={allFilesCssClass}
+                                    onclick={selectAllFiles}>
+                                    <img src={iconAllFilesUrl} alt="All Files" width="48" height="48" />
+                                    <div class="slds-text-heading_small slds-m-top_small">All Order Files</div>
+                                    <div class="slds-text-body_small">Download everything in a ZIP file</div>
+                                </div>
+                            </div>
+                            <div class="slds-col slds-size_1-of-3">
+                                <div class="slds-box slds-box_small slds-text-align_center download-option"
+                                    onclick={selectCoAPdf}>
+                                    <img src={iconCoAUrl} alt="CoA PDF" width="48" height="48" />
+                                    <div class="slds-text-heading_small slds-m-top_small">CoAs (PDF)</div>
+                                    <div class="slds-text-body_small">Certificate of Analysis documents</div>
+                                </div>
+                            </div>
+                            <div class="slds-col slds-size_1-of-3">
+                                <div class={tabularCoACssClass}
+                                    onclick={selectTabularCoA}>
+                                    <img src={iconTabCoAUrl} alt="Tabular CoA" width="48" height="48" />
+                                    <div class="slds-text-heading_small slds-m-top_small">Tabular CoA</div>
+                                    <div class="slds-text-body_small">Single CSV file with tabular data</div>
+                                </div>
+                            </div>
+                            <div class="slds-col slds-size_1-of-3">
+                                <div class={genbankCssClass} onclick={selectGenbankFiles}>
+                                    <img src={iconGenbankUrl} alt="Genbank" width="48" height="48"
+                                        style={genbankIconStyle} />
+                                    <div class="slds-text-heading_small slds-m-top_small" style={genbankTextStyle}>
+                                        Genbank Files</div>
+                                    <template if:false={isGenbankDisabled}>
+                                        <div class="slds-text-body_small" style={genbankTextStyle}>{genbankDescription}
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                            <div class="slds-col slds-size_1-of-3">
+                                <div class={fastaCssClass} onclick={selectFastaFiles}>
+                                    <img src={iconFastaUrl} alt="FASTA" width="48" height="48" style={fastaIconStyle} />
+                                    <div class="slds-text-heading_small slds-m-top_small" style={fastaTextStyle}>FASTA
+                                        Files</div>
+                                    <template if:false={isFastaDisabled}>
+                                        <div class="slds-text-body_small" style={fastaTextStyle}>{fastaDescription}
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                            <div class="slds-col slds-size_1-of-3">
+                                <div class={plateMapsCssClass} onclick={selectPlateMaps}>
+                                    <img src={iconPlateMapsUrl} alt="Plate Maps" width="48" height="48"
+                                        style={plateMapsIconStyle} />
+                                    <div class="slds-text-heading_small slds-m-top_small" style={plateMapsTextStyle}>
+                                        Plate Maps</div>
+                                    <template if:false={isPlateMapsDisabled}>
+                                        <div class="slds-text-body_small" style={plateMapsTextStyle}>
+                                            {plateMapsDescription}</div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <template if:true={sequenceSelectionVisible}>
+                        <div class="slds-text-body_regular slds-m-bottom_medium">
+                            Download all {selectedFileCategory}, or click the download icon for individual sequences:
+                        </div>
+                        <div
+                            class="slds-grid slds-grid_align-spread slds-m-bottom_medium slds-p-around_small download-seq-actions">
+                            <lightning-button variant="neutral" icon-name="utility:back" label="BACK"
+                                onclick={goBackToCategories} disabled={isDownloadInProgress}></lightning-button>
+                            <lightning-button variant="brand" label={downloadAllButtonLabel}
+                                onclick={downloadAllSequences} disabled={isDownloadInProgress}></lightning-button>
+                        </div>
+                        <div class="slds-box slds-box_small download-seq-table-wrap">
+                            <template if:true={sequenceList.length}>
+                                <table class="slds-table slds-table_bordered slds-table_cell-buffer">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Sequence Name</th>
+                                            <th scope="col">Product</th>
+                                            <th scope="col">Status</th>
+                                            <th scope="col">Download</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template for:each={sequenceList} for:item="sequence">
+                                            <tr key={sequence.id} class={sequence.rowClass}>
+                                                <td>{sequence.name}</td>
+                                                <td>{sequence.product}</td>
+                                                <td>{sequence.status}</td>
+                                                <td>
+                                                    <template if:false={sequence.disabled}>
+                                                        <button type="button" class="inline-icon-btn"
+                                                            data-sequence-id={sequence.id} title="Download"
+                                                            aria-label="Download" onclick={handleIndividualDownload}>
+                                                            <c-abt-download-icon size="sm"
+                                                                alternative-text="Download"></c-abt-download-icon>
+                                                        </button>
+                                                    </template>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </template>
+                            <template if:false={sequenceList.length}>
+                                <div class="slds-text-align_center slds-p-around_medium">
+                                    <lightning-spinner alternative-text="Loading sequences..."
+                                        size="small"></lightning-spinner>
+                                    <p>Loading sequences or none found.</p>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

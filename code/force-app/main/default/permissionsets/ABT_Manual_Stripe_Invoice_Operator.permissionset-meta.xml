@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <classAccesses>
+        <apexClass>ABT_StripeInvoiceDispatcher</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <description>For operators with existing invoice access: read-only Stripe processing fields and guarded dispatcher access. No processing-control edits, view-all access, or Flow activation. Assign separately after deployment.</description>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>ABT_Invoice__c.ABT_Stripe_Worker_Id__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>ABT_Invoice__c.ABT_Stripe_Processing_Status__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>ABT_Invoice__c.ABT_Stripe_Retry_Count__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>ABT_Invoice__c.ABT_Stripe_Invoice_Total__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>ABT Manual Stripe Invoice Operator</label>
+</PermissionSet>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomPermission xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>View daily Salesforce invoice summaries and account-wide Stripe summaries in the org's matching environment.</description>
+    <isLicensed>false</isLicensed>
+    <label>View Daily Invoice Report</label>
+</CustomPermission>

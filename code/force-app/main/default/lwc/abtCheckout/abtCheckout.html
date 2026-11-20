@@ -1,0 +1,345 @@
+<template>
+    <div class="checkout-page">
+
+        <!-- Title -->
+        <h2 class="checkout-title">Checkout</h2>
+        <p class="checkout-subtitle">Please fill in all required fields</p>
+
+        <template if:true={hasNotCurrentlyPossibleSequences}>
+            <div class="checkout-ncp-banner checkout-ncp-banner--warning">
+                <lightning-icon icon-name="utility:warning" size="x-small" variant="warning"></lightning-icon>
+                <span>One or more sequences are "Not Currently Possible" and will not be included on your order.</span>
+            </div>
+        </template>
+        <template if:true={hasBlockedCartQuotes}>
+            <div class="checkout-ncp-banner checkout-ncp-banner--error">
+                <lightning-icon icon-name="utility:error" size="x-small" variant="error"></lightning-icon>
+                <span>{checkoutBlockedMessage}</span>
+            </div>
+        </template>
+
+        <!-- Requester -->
+        <div class="checkout-requester-block">
+            <span class="checkout-requester-label">Requester</span>
+            <div class="checkout-requester-name">{currentUserName}</div>
+        </div>
+
+        <div class="checkout-form-grid">
+            <!-- Row 1: Payment Method | Dynamic Payment Fields | Tax/Shipment -->
+            <div class="checkout-row3">
+                <div class="checkout-col">
+                    <label class="checkout-label">Payment method <span class="checkout-required">*</span></label>
+                    <lightning-combobox placeholder="Purchase Order" options={paymentMethodOptions}
+                        value={checkoutPaymentMethod} onchange={handlePaymentMethodChange}
+                        variant="label-hidden"></lightning-combobox>
+                </div>
+
+                <div class="checkout-col">
+                    <!-- Purchase Order -->
+                    <template if:true={isPurchaseOrder}>
+                        <label class="checkout-label">PO number <span class="checkout-required">*</span></label>
+                        <lightning-input data-id="poNumber" type="text" value={poNumber} onchange={handlePoNumberChange}
+                            variant="label-hidden"></lightning-input>
+                    </template>
+
+                    <!-- Credit Card -->
+                    <template if:true={isCreditCard}>
+                        <label class="checkout-label">Credit card <span class="checkout-required">*</span></label>
+                        <template if:true={isLoadingPaymentMethods}>
+                            <p class="checkout-static-val">Loading saved cards…</p>
+                        </template>
+                        <template if:false={isLoadingPaymentMethods}>
+                            <template if:true={hasSavedPaymentMethods}>
+                                <lightning-radio-group options={savedPaymentMethods} value={selectedPaymentMethodId}
+                                    onchange={handleSavedPaymentMethodChange} variant="label-hidden">
+                                </lightning-radio-group>
+                            </template>
+                            <template if:false={hasSavedPaymentMethods}>
+                                <p class="checkout-hint">No saved cards found.</p>
+                            </template>
+                            <a href="#" class="checkout-new-addr" onclick={handleNewCreditCard}>+ Add credit card</a>
+                            <p class="checkout-hint" style="margin-top:8px;">
+                                You can also pay via Stripe when you receive your invoice.
+                            </p>
+                        </template>
+                    </template>
+
+                    <!-- Blanket Purchase Order -->
+                    <template if:true={isBpo}>
+                        <label class="checkout-label">Blanket PO <span class="checkout-required">*</span></label>
+                        <template if:true={isLookingUpBpo}>
+                            <p class="checkout-static-val">Looking up BPO…</p>
+                        </template>
+                        <template if:false={isLookingUpBpo}>
+                            <template if:true={hasBpoOnFile}>
+                                <p class="checkout-static-val">
+                                    BPO on file: {bpoNumber} — Remaining: <strong>{bpoRemainingAmount}</strong>
+                                </p>
+                            </template>
+                            <template if:false={hasBpoOnFile}>
+                                <lightning-input type="text" value={bpoNumber} onchange={handleBpoNumberChange}
+                                    placeholder="Enter BPO number" variant="label-hidden"></lightning-input>
+                                <template if:true={bpoLookupDone}>
+                                    <p class="checkout-hint" style="margin-top:4px;">
+                                        No existing BPO found for this account.
+                                    </p>
+                                </template>
+                            </template>
+                        </template>
+                    </template>
+                </div>
+
+                <div class="checkout-col">
+                    <div class="checkout-check-group">
+                        <label class="checkout-check-label">
+                            <input type="checkbox" class="abt-checkbox-native" onchange={handleTaxExemptChange} />
+                            <span class="checkout-check-text">Tax exempt <span class="checkout-hint">(certificate
+                                    required)</span></span>
+                        </label>
+                        <label class="checkout-check-label" style="margin-top:8px;">
+                            <input type="checkbox" class="abt-checkbox-native" checked={isPartialShipment}
+                                onchange={handlePartialShipChange} />
+                            <span class="checkout-check-text checkout-partial-bold">I accept partial shipments.</span>
+                            <span class="checkout-learn-wrap">
+                                <a href="#" class="checkout-link" onclick={handleLearnMore}>Learn more</a>
+                                <template if:true={showPartialTooltip}>
+                                    <div class="checkout-tooltip-popover">
+                                        <div class="checkout-tooltip-arrow"></div>
+                                        By accepting partial shipments, you agree to be charged a separate shipping fee
+                                        for each shipment dispatched. Partial shipments won't affect your assigned AOTG
+                                        date, but you agree to let us split and invoice your AOTG order if a partial
+                                        shipment occurs. Orders are invoiced upon shipment.
+                                    </div>
+                                </template>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 2: Shipping Method | INCO Terms | Invoice Email -->
+            <div class="checkout-row3">
+                <div class="checkout-col">
+                    <label class="checkout-label">Shipping method</label>
+                    <p class="checkout-static-val">{checkoutShippingLabel}</p>
+                </div>
+                <div class="checkout-col">
+                    <label class="checkout-label">INCO Terms</label>
+                    <p class="checkout-static-val">{incoTerms}</p>
+                </div>
+                <div class="checkout-col">
+                    <label class="checkout-label">Invoice email</label>
+                    <lightning-input type="email" value={invoiceEmail} onchange={handleInvoiceEmailChange}
+                        variant="label-hidden"></lightning-input>
+                </div>
+            </div>
+
+            <!-- Row 3: Billing Address | Shipping Address | Upload Documents -->
+            <div class="checkout-row3">
+                <div class="checkout-col checkout-col--billing">
+                    <label class="checkout-label">Choose billing address <span
+                            class="checkout-required">*</span></label>
+                    <template for:each={billingAddresses} for:item="addr">
+                        <div key={addr.Id} class="checkout-addr-option">
+                            <input type="radio" name="billingAddr" value={addr.Id} checked={addr.isSelected}
+                                onchange={handleBillingAddrChange} />
+                            <span class="checkout-addr-text">{addr.displayAddress}</span>
+                        </div>
+                    </template>
+                    <template if:false={hasBillingAddresses}>
+                        <p class="checkout-no-addr">No billing addresses found.</p>
+                    </template>
+                    <a href="#" class="checkout-new-addr" onclick={handleNewBillingAddress}>+ New billing address</a>
+                </div>
+                <div class="checkout-col checkout-col--shipping">
+                    <label class="checkout-label">Choose shipping address <span
+                            class="checkout-required">*</span></label>
+                    <template for:each={shippingAddresses} for:item="addr">
+                        <div key={addr.Id} class="checkout-addr-option">
+                            <input type="radio" name="shippingAddr" value={addr.Id} checked={addr.isSelected}
+                                onchange={handleShippingAddrChange} />
+                            <span class="checkout-addr-text">{addr.displayAddress}</span>
+                        </div>
+                    </template>
+                    <template if:false={hasShippingAddresses}>
+                        <p class="checkout-no-addr">No shipping addresses found.</p>
+                    </template>
+                    <a href="#" class="checkout-new-addr" onclick={handleNewShippingAddress}>+ New shipping address</a>
+                </div>
+                <div class="checkout-col">
+                    <label class="checkout-label">Upload documents</label>
+                    <div class="checkout-upload-row">
+                        <label class="checkout-browse-btn">
+                            Browse files
+                            <input type="file" accept=".pdf,.doc,.docx,.jpg,.png" onchange={handleDocumentUpload}
+                                style="display:none;" />
+                        </label>
+                        <span class="checkout-formats">Accepted formats:<br />PDF, Word, JPG, PNG</span>
+                    </div>
+                    <template if:true={uploadedDocName}>
+                        <div class="checkout-file-row">
+                            <lightning-icon icon-name="doctype:pdf" size="x-small"
+                                alternative-text="file"></lightning-icon>
+                            <span class="checkout-file-name">{uploadedDocName}</span>
+                            <button class="checkout-file-delete" onclick={handleRemoveDoc}>
+                                <c-abt-delete-icon size="sm" alternative-text="Remove"></c-abt-delete-icon>
+                            </button>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quote summary table -->
+        <div class="checkout-table-wrap">
+            <table class="checkout-table">
+                <thead>
+                    <tr>
+                        <th class="checkout-th checkout-th-tooltip">Quote ID</th>
+                        <th class="checkout-th checkout-th-tooltip">Product</th>
+                        <th class="checkout-th checkout-th-tooltip">Project</th>
+                        <th class="checkout-th checkout-th-tooltip">Sequences</th>
+                        <th class="checkout-th checkout-th-tooltip">
+                            <c-abt-table-header-tooltip label="Tranches">
+                                <p>For large orders, Ansa may split your sequences into separate shipment groups called
+                                    tranches — each with its own estimated ship date so you can receive completed
+                                    sequences sooner.</p>
+                            </c-abt-table-header-tooltip>
+                        </th>
+                        <th class="checkout-th checkout-th-tooltip">
+                            <c-abt-table-header-tooltip label="As Early As Date">
+                                <p>Your order could ship as early as this date — actual timing may vary.</p>
+                            </c-abt-table-header-tooltip>
+                        </th>
+                        <th class="checkout-th checkout-th-tooltip">
+                            <c-abt-table-header-tooltip label="Guaranteed Ship Date" wide="true">
+                                <p><strong>Guaranteed orders:</strong> your committed ship date, backed by Ansa's
+                                    on-time guarantee promise.</p>
+                                <p><strong>Let's Try orders:</strong> your estimated ship date.</p>
+                            </c-abt-table-header-tooltip>
+                        </th>
+                        <th class="checkout-th checkout-th-tooltip">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Multi-quote cart flow: iterate all quotes -->
+                    <template if:true={isMultiQuote}>
+                        <template for:each={quotesForDisplay} for:item="q">
+                            <tr key={q.id} class="checkout-row">
+                                <td class="checkout-td checkout-td-bold">{q.quoteId}</td>
+                                <td class="checkout-td">{q.productName}</td>
+                                <td class="checkout-td">{q.projectName}</td>
+                                <td class="checkout-td">{q.sequenceCount}</td>
+                                <td class="checkout-td">{q.groupCount}</td>
+                                <td class="checkout-td">{q.asEarlyAsDate}</td>
+                                <td class="checkout-td">{q.shipDate}</td>
+                                <td class="checkout-td checkout-td-price">{q.totalPrice}</td>
+                            </tr>
+                        </template>
+                    </template>
+                    <!-- Single-quote new order flow -->
+                    <template if:false={isMultiQuote}>
+                        <tr class="checkout-row">
+                            <td class="checkout-td checkout-td-bold">{quoteId}</td>
+                            <td class="checkout-td">{productName}</td>
+                            <td class="checkout-td">{projectName}</td>
+                            <td class="checkout-td">{sequenceCount}</td>
+                            <td class="checkout-td">{groupCount}</td>
+                            <td class="checkout-td">{asEarlyAsDate}</td>
+                            <td class="checkout-td">{shipDate}</td>
+                            <td class="checkout-td checkout-td-price">{totalPrice}</td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Notes | Promo Code | Totals -->
+        <div class="checkout-bottom-row">
+            <div class="checkout-notes-col">
+                <label class="checkout-label">Special Requests</label>
+                <textarea class="checkout-notes-area" value={checkoutNotes} onchange={handleNotesChange}
+                    placeholder="Enter any special instructions or notes for this order..."></textarea>
+            </div>
+            <div class="checkout-promo-col">
+                <label class="checkout-label">Promo code</label>
+                <div class="checkout-promo-field">
+                    <input type="text" class="checkout-promo-input" value={promoCode} oninput={handlePromoChange}
+                        onkeydown={handlePromoKeydown} placeholder="Enter code" disabled={isPromoInputDisabled}
+                        aria-label="Promo code" />
+                    <button type="button" class={promoApplyButtonClass} onclick={handleApplyPromo}
+                        disabled={isApplyPromoDisabled} aria-busy={isApplyingPromo}>
+                        <template if:true={isApplyingPromo}>
+                            <span class="checkout-promo-spinner" aria-hidden="true"></span>
+                            <span>Applying</span>
+                        </template>
+                        <template if:false={isApplyingPromo}>
+                            <template if:true={hasPromoDiscount}>Applied</template>
+                            <template if:false={hasPromoDiscount}>Apply</template>
+                        </template>
+                    </button>
+                </div>
+                <template if:true={promoCodeMessage}>
+                    <p class={promoMessageClass}>{promoCodeMessage}</p>
+                </template>
+            </div>
+            <div class="checkout-totals-section">
+                <div class="checkout-total-row">
+                    <span class="checkout-total-label">Subtotal:</span>
+                    <span class="checkout-total-value">{subtotal}</span>
+                </div>
+                <template if:true={hasPromoDiscount}>
+                    <div class="checkout-total-row">
+                        <span class="checkout-total-label">Discount:</span>
+                        <span class="checkout-total-value checkout-discount-value">{promoDiscountDisplay}</span>
+                    </div>
+                </template>
+                <div class="checkout-total-row">
+                    <span class="checkout-total-label">Shipping:</span>
+                    <span class="checkout-total-value">{shipping}</span>
+                </div>
+                <div class="checkout-total-row checkout-grand-row">
+                    <span class="checkout-grand-label">TOTAL:</span>
+                    <span class="checkout-grand-value">{grandTotal}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="checkout-footer">
+            <button class="checkout-cancel-btn" onclick={handleCancel} disabled={isCancelDisabled}>Cancel</button>
+            <button class="checkout-submit-btn" onclick={handlePlaceOrder} disabled={isSubmitDisabled}>
+                <template if:true={isCheckingOut}>Processing...</template>
+                <template if:false={isCheckingOut}>Place Order</template>
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Loading overlay -->
+    <template if:true={showBlockingOverlay}>
+        <div class="checkout-loading-overlay">
+            <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+        </div>
+    </template>
+
+    <!-- Add credit card modal (Stripe via VF page) -->
+    <template if:true={isNewCreditCardModalOpen}>
+        <section role="dialog" tabindex="-1" aria-modal="true" class="checkout-cc-modal">
+            <div class="checkout-cc-modal-container">
+                <header class="checkout-cc-modal-header">
+                    <h2 class="checkout-cc-modal-title">Add New Credit Card</h2>
+                    <button type="button" class="checkout-cc-modal-close" title="Close"
+                        onclick={handleCreditCardModalClose}>×</button>
+                </header>
+                <div class="checkout-cc-modal-body">
+                    <iframe title="Add payment method" height="300px" width="100%"
+                        src={paymentMethodIframeUrl}></iframe>
+                    <button type="button" class="checkout-submit-btn checkout-cc-modal-done"
+                        onclick={handleCreditCardModalClose}>Save &amp; Close</button>
+                </div>
+            </div>
+        </section>
+        <div class="checkout-cc-modal-backdrop"></div>
+    </template>
+</template>

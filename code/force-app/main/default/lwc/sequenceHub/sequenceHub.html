@@ -1,0 +1,893 @@
+<template>
+  <main class={hubClass}>
+    <template if:true={hasBanner}>
+      <div class={bannerClass} role="status">
+        <span>{bannerMessage}</span>
+        <button type="button" class="btn-outline" onclick={dismissBanner}>
+          Dismiss
+        </button>
+      </div>
+    </template>
+    <template if:true={errorMessage}>
+      <div
+        class="slds-notify slds-notify_alert slds-alert_error slds-m-bottom_small"
+        role="alert"
+      >
+        <span>{errorMessage}</span>
+      </div>
+    </template>
+
+    <template if:true={isBusy}
+      ><lightning-spinner
+        alternative-text="Loading sequences"
+      ></lightning-spinner
+    ></template>
+    <template if:true={isListView}>
+      <header class="page-head">
+        <div class="page-intro">
+          <h1>Sequences</h1>
+          <p class="lede">
+            Browse, upload, search, and optimize all your team’s sequences in
+            one place.
+          </p>
+        </div>
+
+        <template if:false={hasSelection}>
+          <div class="toolbar">
+            <label class="upload-btn">
+              Upload files
+              <input
+                type="file"
+                accept=".xls,.xlsx,.fasta,.fa,.gb,.gbk"
+                disabled={isUploading}
+                onchange={handleUploadFile}
+              />
+            </label>
+            <span class="formats">Accepted formats:<br />XLS, FASTA, GB</span>
+
+            <div class="search-box">
+              <input
+                type="search"
+                class="search-input"
+                placeholder="Search names, IDs, or DNA bases"
+                aria-label="Search names, IDs, or DNA bases"
+                value={searchTerm}
+                oninput={handleSearchInput}
+                onkeydown={handleSearchKey}
+              />
+              <button
+                type="button"
+                class="icon-btn"
+                aria-label="Run search"
+                onclick={applySearch}
+              >
+                <lightning-icon
+                  icon-name="utility:search"
+                  size="x-small"
+                  alternative-text=""
+                ></lightning-icon>
+              </button>
+            </div>
+
+            <div class="filter-wrap">
+              <button
+                type="button"
+                class="icon-btn icon-btn--blue"
+                aria-label="Filter sequences"
+                aria-expanded={showFilters}
+                onclick={toggleFilters}
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.6"
+                  stroke-linejoin="round"
+                  stroke-linecap="round"
+                  class="filter-icon"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <path d="M3 4h18l-7 8.5V19l-4 2v-8.5L3 4z"></path>
+                </svg>
+                <template if:true={hasActiveFilters}
+                  ><span class="filter-dot"></span
+                ></template>
+              </button>
+
+              <template if:true={showFilters}>
+                <div
+                  class="filter-pop"
+                  role="dialog"
+                  aria-label="Filter sequences"
+                  onkeydown={handleFilterKey}
+                >
+                  <label class="filter-row">
+                    <span>Owner:</span>
+                    <select
+                      data-field="draftOwner"
+                      onchange={handleDraftChange}
+                    >
+                      <template for:each={ownerOptions} for:item="opt">
+                        <option
+                          key={opt.value}
+                          value={opt.value}
+                          selected={opt.selected}
+                        >
+                          {opt.label}
+                        </option>
+                      </template>
+                    </select>
+                  </label>
+                  <label class="filter-row">
+                    <span>Feasibility:</span>
+                    <select
+                      data-field="draftFeasibility"
+                      onchange={handleDraftChange}
+                    >
+                      <template for:each={feasibilityChoices} for:item="opt">
+                        <option
+                          key={opt.value}
+                          value={opt.value}
+                          selected={opt.selected}
+                        >
+                          {opt.label}
+                        </option>
+                      </template>
+                    </select>
+                  </label>
+                  <label class="filter-row">
+                    <span>Complexity:</span>
+                    <select
+                      data-field="draftComplexity"
+                      onchange={handleDraftChange}
+                    >
+                      <template for:each={complexityChoices} for:item="opt">
+                        <option
+                          key={opt.value}
+                          value={opt.value}
+                          selected={opt.selected}
+                        >
+                          {opt.label}
+                        </option>
+                      </template>
+                    </select>
+                  </label>
+                  <label class="filter-row">
+                    <span>Created Date:</span>
+                    <input
+                      type="date"
+                      data-field="draftDate"
+                      value={draftDate}
+                      onchange={handleDraftChange}
+                    />
+                  </label>
+                  <div class="filter-actions">
+                    <button
+                      type="button"
+                      class="btn-outline"
+                      onclick={clearFilters}
+                    >
+                      Clear
+                    </button>
+                    <button
+                      type="button"
+                      class="btn-solid"
+                      onclick={applyFilters}
+                    >
+                      Apply
+                    </button>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+        </template>
+        <template if:true={hasSelection}>
+          <div
+            class="selected-actions"
+            role="toolbar"
+            aria-label="Selected sequences"
+          >
+            <span class="sr-only" role="status">{selectedCount} selected</span>
+            <button
+              type="button"
+              class="bulk-action"
+              disabled={isBulkOptimizeDisabled}
+              onclick={handleBulkOptimize}
+            >
+              <c-sequence-hub-icon name="optimize"></c-sequence-hub-icon
+              >Optimize
+            </button>
+            <button
+              type="button"
+              class="bulk-action"
+              disabled={isBulkOptimizeDisabled}
+              onclick={handleBulkAnnotations}
+            >
+              <c-sequence-hub-icon name="add"></c-sequence-hub-icon>Add
+              Annotation
+            </button>
+            <button
+              type="button"
+              class="bulk-action"
+              disabled={isBulkOptimizeDisabled}
+              onclick={handleBulkFeasibility}
+            >
+              <c-sequence-hub-icon name="feasibility"></c-sequence-hub-icon>Run
+              Feasibility
+            </button>
+            <button
+              type="button"
+              class="bulk-action bulk-action--primary"
+              disabled={isBulkQuoteDisabled}
+              title="Copy up to 25 selected sequences to a quote"
+              onclick={handleAddToQuote}
+            >
+              Add to quote
+            </button>
+          </div>
+        </template>
+      </header>
+
+      <p class="hint">Click on a row to view sequence details.</p>
+
+      <section class="results" aria-label="Sequence results">
+        <template if:true={hasRows}>
+          <div class="table-wrap">
+            <table class="seq-table">
+              <thead>
+                <tr>
+                  <th class="col-check">
+                    <input
+                      type="checkbox"
+                      aria-label="Select all sequences"
+                      checked={allSelected}
+                      onchange={handleSelectAll}
+                    />
+                  </th>
+                  <th>Name</th>
+                  <th>Owner</th>
+                  <th>Created Date</th>
+                  <th>Annotations</th>
+                  <th>Plannotate</th>
+                  <th>Feasibility</th>
+                  <th>Status</th>
+                  <th>Date Ordered</th>
+                  <th class="col-action">
+                    <span class="sr-only">Actions</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <template for:each={displayRows} for:item="row">
+                  <tr
+                    key={row.id}
+                    class={row.rowClass}
+                    aria-selected={row.selected}
+                    data-id={row.id}
+                    tabindex="0"
+                    onclick={handleRowClick}
+                    onkeydown={handleRowKey}
+                  >
+                    <td class="col-check" onclick={stopClick}>
+                      <input
+                        type="checkbox"
+                        data-id={row.id}
+                        aria-label="Select sequence"
+                        checked={row.selected}
+                        onchange={handleSelectRow}
+                      />
+                    </td>
+                    <td class="cell-name">{row.displayName}</td>
+                    <td>{row.ownerName}</td>
+                    <td>{row.createdDisplay}</td>
+                    <td>
+                      <template for:each={row.annotationChips} for:item="chip">
+                        <span key={chip.key} class="chip">{chip.label}</span>
+                      </template>
+                    </td>
+                    <td>
+                      <template for:each={row.plannotateChips} for:item="chip">
+                        <span key={chip.key} class="chip chip--automatic"
+                          >{chip.label}</span
+                        >
+                      </template>
+                    </td>
+                    <td>{row.feasibility}</td>
+                    <td>
+                      <template if:true={row.status}
+                        ><span class={row.statusClass}
+                          >{row.status}</span
+                        ></template
+                      >
+                    </td>
+                    <td>{row.orderedDisplay}</td>
+                    <td class="col-action" onclick={stopClick}>
+                      <button
+                        type="button"
+                        class="icon-btn icon-btn--blue"
+                        data-id={row.id}
+                        aria-label="Optimize sequence"
+                        title="Optimize"
+                        onclick={handleRowOptimize}
+                      >
+                        <c-sequence-hub-icon
+                          name="optimize"
+                        ></c-sequence-hub-icon>
+                      </button>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+          <template if:true={hasMore}>
+            <div class="load-more">
+              <lightning-button
+                label="Load more"
+                onclick={handleLoadMore}
+                disabled={isLoading}
+              ></lightning-button>
+            </div>
+          </template>
+        </template>
+
+        <template if:false={hasRows}>
+          <template if:false={isBusy}>
+            <div class="empty-state">
+              <lightning-icon
+                icon-name="utility:search"
+                size="medium"
+                alternative-text=""
+              ></lightning-icon>
+              <h2>No sequences found</h2>
+              <p>Try changing your search or filters.</p>
+            </div>
+          </template>
+        </template>
+      </section>
+    </template>
+
+    <template if:false={isListView}>
+      <div class="detail-top-spacing" aria-hidden="true"></div>
+      <section
+        class="detail-card slds-m-top_large"
+        aria-label="Sequence details"
+      >
+        <div class="detail-heading">
+          <h1>Sequence ID #{selectedSequence.sequenceNumber}</h1>
+          <span class={detailStatusClass}>{detailStatus}</span>
+        </div>
+        <div class="detail-grid">
+          <div class="detail-column">
+            <div class="detail-field">
+              <div class="detail-field-heading">
+                <span class="detail-label">Sequence Name</span>
+                <lightning-button-icon
+                  icon-name="utility:edit"
+                  variant="bare"
+                  alternative-text="Rename sequence"
+                  onclick={openRename}
+                ></lightning-button-icon>
+              </div>
+              <strong class="detail-value-large"
+                >{selectedSequence.sequenceName}</strong
+              >
+            </div>
+            <div class="detail-field">
+              <span class="detail-label">Owner</span>
+              <span>{selectedSequence.ownerName}</span>
+            </div>
+            <div class="detail-field">
+              <div class="detail-field-heading">
+                <span class="detail-label">Feasibility</span
+                ><button
+                  type="button"
+                  class="heading-icon"
+                  aria-label="Request feasibility"
+                  title="Request feasibility"
+                  onclick={handleRequestFeasibility}
+                  disabled={isBusy}
+                >
+                  <c-sequence-hub-icon name="feasibility"></c-sequence-hub-icon>
+                </button>
+              </div>
+              <span>{detailFeasibility}</span>
+            </div>
+            <div class="detail-field">
+              <div class="detail-field-heading">
+                <h2>Manual Annotations</h2>
+                <button
+                  type="button"
+                  class="heading-icon"
+                  aria-label="Edit annotations"
+                  onclick={openAnnotations}
+                  disabled={isBusy}
+                >
+                  <c-sequence-hub-icon name="add"></c-sequence-hub-icon>
+                </button>
+              </div>
+              <div class="detail-chips">
+                <template if:true={hasManualFeatures}>
+                  <template for:each={manualFeatures} for:item="feature">
+                    <span class="chip" key={feature.key} title={feature.tooltip}
+                      ><span>{feature.label}</span
+                      ><button
+                        type="button"
+                        class="chip-remove"
+                        aria-label={feature.removeLabel}
+                        data-index={feature.key}
+                        onclick={removeManualFeature}
+                        disabled={isBusy}
+                      >
+                        ×
+                      </button></span
+                    >
+                  </template>
+                </template>
+                <template if:false={hasManualFeatures}
+                  ><p>No manual annotations.</p></template
+                >
+              </div>
+            </div>
+          </div>
+          <div class="detail-column">
+            <div class="detail-field">
+              <span class="detail-label">Created Date</span>
+              <strong class="detail-value-large">{detailCreatedDate}</strong>
+            </div>
+            <div class="detail-field">
+              <span class="detail-label">Vector</span>
+              <div
+                class="vector-dropdown"
+                onfocusout={handleVectorBlur}
+                onkeydown={handleVectorKey}
+              >
+                <button
+                  type="button"
+                  class="vector-select"
+                  onclick={openVectorEditor}
+                  disabled={isBusy}
+                  aria-label="Edit vector"
+                  aria-haspopup="listbox"
+                  aria-expanded={showVectorDropdown}
+                >
+                  <span>{detailVector}</span>
+                  <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                    <path d="M2 5h12l-6 7z"></path>
+                  </svg>
+                </button>
+                <template if:true={showVectorDropdown}>
+                  <div
+                    class="vector-menu"
+                    role="listbox"
+                    aria-label="Available vectors"
+                    aria-busy={isLoadingVectors}
+                  >
+                    <template if:true={isLoadingVectors}
+                      ><p class="vector-message" role="status">
+                        Loading vectors…
+                      </p></template
+                    >
+                    <template for:each={detailVectorOptions} for:item="option">
+                      <button
+                        type="button"
+                        role="option"
+                        tabindex="-1"
+                        key={option.value}
+                        data-vector-id={option.value}
+                        class="vector-option"
+                        aria-selected={option.selected}
+                        onclick={handleSelectVector}
+                      >
+                        <span>{option.label}</span
+                        ><span class="vector-check" aria-hidden="true"
+                          >{option.checkmark}</span
+                        >
+                      </button>
+                    </template>
+                    <template if:true={noAvailableVectors}
+                      ><p class="vector-message">
+                        No active vectors are available for your account.
+                      </p></template
+                    >
+                  </div>
+                </template>
+                <template if:true={vectorError}
+                  ><p class="vector-error" role="alert">
+                    {vectorError}
+                  </p></template
+                >
+              </div>
+            </div>
+            <div class="detail-field">
+              <span class="detail-label">Complexity</span>
+              <span>{detailComplexity}</span>
+            </div>
+            <div class="detail-field">
+              <div class="detail-field-heading">
+                <h2>Plannotate</h2>
+                <button
+                  type="button"
+                  class="heading-icon"
+                  aria-label="Run Plannotate"
+                  title={annotationServiceHint}
+                  onclick={runAnnotation}
+                  disabled={isAnnotationRunDisabled}
+                >
+                  <c-sequence-hub-icon name="add"></c-sequence-hub-icon>
+                </button>
+              </div>
+              <div class="detail-chips detail-chips--automatic">
+                <template if:true={hasAutomaticFeatures}>
+                  <template for:each={automaticFeatures} for:item="feature">
+                    <span class="chip" key={feature.key} title={feature.tooltip}
+                      ><span>{feature.label}</span
+                      ><button
+                        type="button"
+                        class="chip-remove"
+                        aria-label={feature.removeLabel}
+                        data-index={feature.key}
+                        onclick={removeAutomaticFeature}
+                        disabled={isBusy}
+                      >
+                        ×
+                      </button></span
+                    >
+                  </template>
+                </template>
+                <template if:false={hasAutomaticFeatures}
+                  ><p>No Plannotate results.</p></template
+                >
+              </div>
+              <p class="detail-hint">Status: {annotationStatus}</p>
+              <p class="detail-hint">{annotationServiceHint}</p>
+            </div>
+          </div>
+          <div class="detail-column">
+            <div class="detail-field">
+              <span class="detail-label">Ordered Date</span>
+              <strong class="detail-value-large">{detailOrderedDate}</strong>
+            </div>
+            <div class="detail-field">
+              <span class="detail-label">Project</span>
+              <span>&mdash;</span>
+            </div>
+            <div class="detail-field detail-links">
+              <button
+                type="button"
+                class="detail-link"
+                onclick={handleDownloadCsv}
+              >
+                <c-abt-download-icon
+                  size="md"
+                  alternative-text=""
+                ></c-abt-download-icon>
+                Download Genbank
+              </button>
+              <button
+                type="button"
+                class="detail-link"
+                onclick={handleShare}
+                disabled={isBusy}
+              >
+                <c-sequence-hub-icon name="share"></c-sequence-hub-icon>
+                Share
+              </button>
+            </div>
+          </div>
+        </div>
+        <template if:true={selectedSequence.sequenceError}>
+          <div
+            class="slds-notify slds-notify_alert slds-alert_warning slds-m-top_large"
+            role="status"
+          >
+            {selectedSequence.sequenceError}
+          </div>
+        </template>
+        <template if:true={selectedSequence.feasibilityExplained}>
+          <section class="detail-explanation">
+            <h2>Feasibility</h2>
+            <lightning-formatted-text
+              value={selectedSequence.feasibilityExplained}
+            ></lightning-formatted-text>
+          </section>
+        </template>
+        <div class="sequence-layout">
+          <section class="sequence-panel" aria-labelledby="sequence-heading">
+            <div class="sequence-heading">
+              <h2 id="sequence-heading">Sequence</h2>
+              <span class="detail-hint">{selectedSequence.length} bp</span>
+            </div>
+            <pre class="sequence-text">{sequenceText}</pre>
+          </section>
+          <div
+            class="sequence-actions"
+            role="group"
+            aria-label="Sequence actions"
+          >
+            <button
+              type="button"
+              class="sequence-action"
+              onclick={openOptimizeInfo}
+              disabled={isOptimizeDisabled}
+            >
+              <c-sequence-hub-icon name="optimize"></c-sequence-hub-icon>
+              Optimize
+            </button>
+            <button
+              type="button"
+              class="sequence-action"
+              onclick={openVisualization}
+              disabled={isBusy}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path
+                  d="M2 2h20v20H2zM2 7h20M2 12h20M2 17h20M8 2v20M15 2v20"
+                ></path>
+              </svg>
+              Visualize
+            </button>
+            <button
+              type="button"
+              class="sequence-action sequence-action--primary"
+              onclick={handleAddToQuote}
+              disabled={isBusy}
+            >
+              Add to quote
+            </button>
+          </div>
+        </div>
+        <template if:true={selectedSequence.optimizationUnavailableReason}>
+          <p class="detail-hint slds-m-top_small" role="status">
+            {selectedSequence.optimizationUnavailableReason}
+          </p>
+        </template>
+      </section>
+    </template>
+
+    <template if:true={hasDialog}>
+      <section class="modal-backdrop" role="presentation">
+        <div
+          class="modal-card"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="hub-dialog-title"
+          onkeydown={handleDialogKey}
+        >
+          <div class="modal-heading">
+            <h2 id="hub-dialog-title">{dialogTitle}</h2>
+            <lightning-button-icon
+              icon-name="utility:close"
+              alternative-text="Close dialog"
+              onclick={closeDialog}
+              disabled={isSaving}
+            ></lightning-button-icon>
+          </div>
+          <template if:true={dialogError}
+            ><p class="slds-text-color_error slds-m-bottom_medium" role="alert">
+              {dialogError}
+            </p></template
+          >
+          <template if:true={isQuoteDialog}>
+            <p class="slds-m-bottom_medium">
+              Copies the selected DNA into an existing open quote. The original
+              sequences and their order history are preserved.
+            </p>
+            <lightning-combobox
+              label="Destination quote"
+              value={selectedQuote}
+              options={quoteOptions}
+              data-field="selectedQuote"
+              onchange={handleDialogInput}
+              disabled={isSaving}
+            ></lightning-combobox>
+            <lightning-combobox
+              label="Vector for the new quote sequences"
+              value={selectedVector}
+              options={vectorOptions}
+              data-field="selectedVector"
+              onchange={handleDialogInput}
+              disabled={isSaving}
+            ></lightning-combobox>
+            <template if:true={noOpenQuotes}
+              ><p>
+                Create a quote in the Quotes page first, then return here to add
+                sequences.
+              </p></template
+            >
+            <div class="dialog-actions">
+              <lightning-button
+                label="Cancel"
+                onclick={closeDialog}
+                disabled={isSaving}
+              ></lightning-button
+              ><lightning-button
+                label="Add selected sequences"
+                variant="brand"
+                onclick={confirmAddToQuote}
+                disabled={isQuoteSaveDisabled}
+              ></lightning-button>
+            </div>
+          </template>
+          <template if:true={isAnnotationDialog}>
+            <p>Coordinates start at 1 and include both endpoints.</p>
+            <template if:true={isBulkAnnotation}
+              ><p>
+                New annotations are added to each selected sequence. Existing
+                annotations are preserved.
+              </p></template
+            >
+            <div class="annotation-inputs">
+              <lightning-input
+                label="Feature name"
+                value={featureLabel}
+                maxlength="80"
+                data-field="featureLabel"
+                onchange={handleDialogInput}
+              ></lightning-input>
+              <lightning-input
+                label="Start"
+                type="number"
+                min="1"
+                step="1"
+                value={featureStart}
+                data-field="featureStart"
+                onchange={handleDialogInput}
+              ></lightning-input>
+              <lightning-input
+                label="End"
+                type="number"
+                min="1"
+                step="1"
+                value={featureEnd}
+                data-field="featureEnd"
+                onchange={handleDialogInput}
+              ></lightning-input>
+              <label
+                >Strand<select
+                  data-field="featureStrand"
+                  onchange={handleDialogInput}
+                >
+                  <option value="1">Forward</option>
+                  <option value="-1">Reverse</option>
+                </select></label
+              >
+            </div>
+            <lightning-button
+              label="Add feature"
+              onclick={addFeature}
+              disabled={isSaving}
+            ></lightning-button>
+            <ul class="annotation-list">
+              <template for:each={featureRows} for:item="feature"
+                ><li key={feature.key}>
+                  <span>{feature.label}: {feature.start}-{feature.end}</span
+                  ><lightning-button-icon
+                    icon-name="utility:delete"
+                    alternative-text="Remove feature"
+                    data-index={feature.key}
+                    onclick={removeFeature}
+                    disabled={isSaving}
+                  ></lightning-button-icon></li
+              ></template>
+            </ul>
+            <div class="dialog-actions">
+              <lightning-button
+                label="Cancel"
+                onclick={closeDialog}
+                disabled={isSaving}
+              ></lightning-button
+              ><lightning-button
+                label="Save annotations"
+                variant="brand"
+                onclick={confirmAnnotations}
+                disabled={isSaving}
+              ></lightning-button>
+            </div>
+          </template>
+          <template if:true={isRenameDialog}>
+            <lightning-input
+              label="Sequence name"
+              value={draftName}
+              maxlength="255"
+              data-field="draftName"
+              onchange={handleDialogInput}
+              required
+            ></lightning-input>
+            <div class="dialog-actions">
+              <lightning-button
+                label="Cancel"
+                onclick={closeDialog}
+                disabled={isSaving}
+              ></lightning-button
+              ><lightning-button
+                label="Save name"
+                variant="brand"
+                onclick={confirmRename}
+                disabled={isSaving}
+              ></lightning-button>
+            </div>
+          </template>
+          <template if:true={isShareDialog}>
+            <p class="slds-m-bottom_medium">
+              Share this link with teammates. It preserves existing account
+              access and grants no new permissions.
+            </p>
+            <input
+              type="url"
+              class="share-url"
+              aria-label="Sequence share link"
+              value={shareUrl}
+              readonly
+            />
+            <div class="dialog-actions">
+              <lightning-button
+                label="Copy link"
+                variant="brand"
+                onclick={copyShareLink}
+              ></lightning-button>
+            </div>
+          </template>
+          <template if:true={isVisualizationDialog}
+            ><c-sequence-visualizer
+              sequence={selectedSequence.sequence}
+              features={visualizationFeatures}
+            ></c-sequence-visualizer
+          ></template>
+        </div>
+      </section>
+    </template>
+
+    <template if:true={showOptimizeInfo}>
+      <section
+        class="modal-backdrop"
+        role="presentation"
+        onclick={closeOptimizeInfo}
+      >
+        <div
+          class="modal-card optimizer-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="optimize-title"
+          onclick={stopModalClick}
+        >
+          <div class="modal-heading">
+            <div>
+              <p class="eyebrow">SEQUENCE HUB</p>
+              <h2 id="optimize-title">{optimizerTitle}</h2>
+            </div>
+            <lightning-button-icon
+              icon-name="utility:close"
+              alternative-text="Close optimizer"
+              onclick={closeOptimizeInfo}
+            ></lightning-button-icon>
+          </div>
+          <p class="optimizer-intro">
+            Optimizing saves the result as a new sequence with “_optimized”
+            added to its name. The original sequence is not changed. Its quote
+            must not be ordered or rejected.
+          </p>
+          <template if:true={proteinNeeded}
+            ><p class="slds-m-bottom_medium">
+              Enter or upload the protein associated with this DNA. The original
+              DNA is preserved.
+            </p></template
+          >
+          <c-codon-optimizer
+            sequence-id={optimizerSequenceId}
+            sequence-targets={optimizationTargets}
+            amino-acid-id={optimizerAminoAcidId}
+            initial-sequence={optimizerProtein}
+            initial-settings={optimizerSettings}
+            onoptimized={handleOptimizationComplete}
+            onclose={closeOptimizeInfo}
+          ></c-codon-optimizer>
+        </div>
+      </section>
+    </template>
+  </main>
+</template>

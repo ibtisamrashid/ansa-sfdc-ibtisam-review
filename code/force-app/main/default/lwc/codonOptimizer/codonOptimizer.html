@@ -1,0 +1,330 @@
+<template>
+  <section class="codon-shell" aria-label="Amino acid codon optimization">
+    <div class="codon-layout">
+      <div class="codon-settings">
+        <template if:true={isLoadingCatalog}>
+          <lightning-spinner
+            alternative-text="Loading organisms"
+            size="small"
+          ></lightning-spinner>
+        </template>
+        <template if:false={isLoadingCatalog}>
+          <div class="top-fields">
+            <div class="organism-field">
+              <span class="field-title" aria-hidden="true"
+                >Target organism
+                <span class="field-count"
+                  >&nbsp;({organismCount} available)</span
+                ></span
+              >
+              <lightning-combobox
+                label={organismLabel}
+                variant="label-hidden"
+                name="organismSlug"
+                value={organismSlug}
+                options={organismOptions}
+                placeholder="Select target organism"
+                onchange={handleChange}
+                required
+              ></lightning-combobox>
+            </div>
+            <div class="model-field">
+              <span class="field-title">Model</span>
+              <div
+                class="model-toggle"
+                role="group"
+                aria-label="Optimization model"
+              >
+                <template for:each={modelOptionsForButtons} for:item="model">
+                  <button
+                    key={model.value}
+                    type="button"
+                    class={model.className}
+                    data-model={model.value}
+                    onclick={handleModelSelect}
+                    disabled={model.disabled}
+                    aria-pressed={model.selected}
+                  >
+                    {model.label}
+                  </button>
+                </template>
+              </div>
+            </div>
+          </div>
+
+          <section class="accordion">
+            <button
+              class="accordion-heading"
+              type="button"
+              aria-expanded={showFlanks}
+              onclick={toggleFlanks}
+            >
+              <span>Flanking sequences</span>
+              <span class="accordion-trailing"
+                ><span class="chevron"></span
+              ></span>
+            </button>
+            <template if:true={showFlanks}>
+              <div class="accordion-content flank-content">
+                <lightning-textarea
+                  label="5' flank (prepended, shown lowercase)"
+                  name="flank5"
+                  value={flank5}
+                  onchange={handleChange}
+                  maxlength="5000"
+                ></lightning-textarea>
+                <lightning-textarea
+                  label="3' flank (appended, shown lowercase)"
+                  name="flank3"
+                  value={flank3}
+                  onchange={handleChange}
+                  maxlength="5000"
+                ></lightning-textarea>
+                <lightning-input
+                  type="checkbox"
+                  label="Include stop codon at the end of the CDS"
+                  name="includeStop"
+                  checked={includeStop}
+                  onchange={handleChange}
+                ></lightning-input>
+              </div>
+            </template>
+          </section>
+
+          <section class="accordion">
+            <button
+              class="accordion-heading"
+              type="button"
+              aria-expanded={showSites}
+              onclick={toggleSites}
+            >
+              <span>Sites to avoid</span>
+              <span class="accordion-trailing">
+                <template if:true={selectedEnzymeCount}
+                  ><span class="selected-count"
+                    >{selectedEnzymeCount} selected</span
+                  ></template
+                >
+                <span class="chevron"></span>
+              </span>
+            </button>
+            <template if:true={showSites}>
+              <div class="accordion-content">
+                <div class="enzyme-grid">
+                  <template for:each={enzymeOptions} for:item="enzyme">
+                    <label key={enzyme.value} class={enzyme.className}>
+                      <input
+                        type="checkbox"
+                        value={enzyme.value}
+                        checked={enzyme.checked}
+                        onchange={handleEnzymeChange}
+                      />
+                      <strong>{enzyme.label}</strong>
+                      <code>{enzyme.sequence}</code>
+                    </label>
+                  </template>
+                  <label class="enzyme-chip custom-chip">
+                    <input
+                      type="checkbox"
+                      checked={hasCustomSites}
+                      onchange={toggleCustomSites}
+                    />
+                    <strong>Other</strong>
+                  </label>
+                </div>
+                <template if:true={showCustomSites}>
+                  <lightning-input
+                    class="custom-sites-field"
+                    label="Custom IUPAC patterns"
+                    name="customSitesText"
+                    value={customSitesText}
+                    onchange={handleChange}
+                    placeholder="For example, GGWCC"
+                    field-level-help="Separate patterns with commas or spaces."
+                  ></lightning-input>
+                </template>
+                <div class="site-warning" role="note">
+                  <strong
+                    >Selected sites are enforced during generation.</strong
+                  >
+                  <span class="site-warning-detail"
+                    >&nbsp;The optimizer also reports any detected sites in the
+                    results.</span
+                  >
+                </div>
+              </div>
+            </template>
+          </section>
+
+          <section class="accordion">
+            <button
+              class="accordion-heading"
+              type="button"
+              aria-expanded={showAdvanced}
+              onclick={toggleAdvanced}
+            >
+              <span>Advanced options</span>
+              <span class="accordion-trailing"
+                ><span class="chevron"></span
+              ></span>
+            </button>
+            <template if:true={showAdvanced}>
+              <div class="accordion-content advanced-content">
+                <lightning-input
+                  type="checkbox"
+                  label="Deterministic"
+                  name="deterministic"
+                  checked={deterministic}
+                  onchange={handleChange}
+                ></lightning-input>
+                <p>
+                  Pick the highest-probability codon at each position. Turn off
+                  to sample variants.
+                </p>
+              </div>
+            </template>
+          </section>
+        </template>
+
+        <template if:true={errorMessage}>
+          <div class="codon-error" role="alert">{errorMessage}</div>
+        </template>
+        <template if:true={showWarningDecision}>
+          <div class="codon-warning" role="alert">
+            <p>{warningMessage}</p>
+            <div class="inline-actions">
+              <lightning-button
+                label="Edit"
+                onclick={handleEditWarnings}
+              ></lightning-button>
+              <lightning-button
+                variant="brand"
+                label="Proceed"
+                onclick={handleProceedWarnings}
+              ></lightning-button>
+            </div>
+          </div>
+        </template>
+        <template if:true={jobStatus}>
+          <div class="codon-progress" role="status">
+            <span>{progressLabel}</span>
+            <progress value={progress} max="100">{progress}%</progress>
+          </div>
+        </template>
+        <template if:true={hasResults}>
+          <p class="result-summary" role="status">{resultSummary}</p>
+          <lightning-button
+            label="Download results CSV"
+            icon-name="utility:download"
+            onclick={downloadResults}
+          ></lightning-button>
+          <template for:each={results} for:item="row">
+            <div key={row.key} class="result-row">
+              <strong>{row.name}</strong>
+              <template if:true={row.error}
+                ><span class="codon-error">{row.error}</span></template
+              >
+              <template if:false={row.error}><span>Optimized</span></template>
+            </div>
+          </template>
+        </template>
+      </div>
+
+      <aside class="upload-panel" aria-label="Uploaded amino acid file">
+        <template if:true={isBulkMode}>
+          <h2>{bulkInputTitle}</h2>
+          <p>
+            Provide the protein for each sequence. The same optimization
+            settings apply to every selected sequence; each result is saved as a
+            new copy.
+          </p>
+          <div class="bulk-proteins">
+            <template for:each={bulkProteinRows} for:item="target">
+              <lightning-textarea
+                key={target.id}
+                label={target.name}
+                value={target.protein}
+                data-sequence-id={target.id}
+                onchange={handleBulkProteinInput}
+                disabled={isBusy}
+                required
+                placeholder="Paste this sequence’s amino acid sequence"
+              ></lightning-textarea>
+            </template>
+          </div>
+        </template>
+        <template if:false={isBulkMode}>
+          <div class="upload-illustration" aria-hidden="true">
+            <svg viewBox="0 0 96 96" role="img">
+              <path
+                d="M24 64H70c10 0 17-7 17-16 0-9-7-16-16-16-3-12-12-19-23-19-12 0-21 8-23 19-11 1-18 8-18 17 0 8 7 15 17 15Z"
+              />
+              <path d="M48 69V39m-12 12 12-12 12 12" />
+            </svg>
+            <span>LSIR</span>
+          </div>
+          <h2>Upload Amino Acids</h2>
+          <p>
+            Upload a list of amino acids and let us create your codon-optimized
+            sequences.
+          </p>
+          <lightning-textarea
+            class="paste-sequence"
+            label="Or paste amino acid sequence(s)"
+            value={manualSequence}
+            onchange={handleManualInput}
+            placeholder="Paste a sequence, or FASTA-formatted sequences"
+          ></lightning-textarea>
+          <div class="upload-controls">
+            <label class="browse-button">
+              Browse files
+              <input
+                type="file"
+                accept=".csv,.fasta,.fa,.faa"
+                onchange={handleReplacementFile}
+              />
+            </label>
+            <span class="accepted-formats"
+              >Accepted formats:<br />CSV, FASTA, FA, FAA</span
+            >
+          </div>
+          <template if:true={fileName}>
+            <div class="file-details">
+              <span class="file-glyph" aria-hidden="true">▯</span>
+              <span class="file-name" title={fileName}>{fileName}</span>
+              <button
+                class="remove-file"
+                type="button"
+                onclick={handleRemoveFile}
+                disabled={isBusy}
+                aria-label="Remove uploaded file"
+              >
+                <lightning-icon
+                  icon-name="utility:delete"
+                  size="x-small"
+                  alternative-text="Remove file"
+                ></lightning-icon>
+              </button>
+            </div>
+          </template>
+        </template>
+        <template if:true={isBusy}>
+          <lightning-spinner
+            alternative-text="Submitting sequences to the optimizer"
+            size="small"
+          ></lightning-spinner>
+        </template>
+      </aside>
+    </div>
+    <template if:true={hasSequenceContext}>
+      <div class="sequence-optimize-actions">
+        <lightning-button
+          label={optimizeButtonLabel}
+          variant="brand"
+          onclick={handleSequenceOptimize}
+          disabled={isBusy}
+        ></lightning-button>
+      </div>
+    </template>
+  </section>
+</template>

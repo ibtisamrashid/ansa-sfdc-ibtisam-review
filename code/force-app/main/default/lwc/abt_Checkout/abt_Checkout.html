@@ -1,0 +1,215 @@
+<template>
+    <div class="checkout-page">
+
+        <!-- Title -->
+        <h2 class="checkout-title">Checkout</h2>
+        <p class="checkout-subtitle">Please fill in all required fields</p>
+
+        <!-- Requester -->
+        <div class="checkout-requester-block">
+            <span class="checkout-requester-label">Requester</span>
+            <div class="checkout-requester-name">{currentUserName}</div>
+        </div>
+
+        <!-- Row 1: Payment Method | PO Number | Tax/Shipment -->
+        <div class="checkout-row3">
+            <div class="checkout-col">
+                <label class="checkout-label">Payment method <span class="checkout-required">*</span></label>
+                <lightning-combobox placeholder="Purchase Order" options={paymentMethodOptions}
+                    value={checkoutPaymentMethod} onchange={handlePaymentMethodChange}
+                    variant="label-hidden"></lightning-combobox>
+            </div>
+            <div class="checkout-col">
+                <label class="checkout-label">PO number <span class="checkout-required">*</span></label>
+                <lightning-input type="text" value={poNumber} onchange={handlePoNumberChange}
+                    variant="label-hidden"></lightning-input>
+            </div>
+            <div class="checkout-col">
+                <div class="checkout-check-group">
+                    <label class="checkout-check-label">
+                        <input type="checkbox" onchange={handleTaxExemptChange} />
+                        <span class="checkout-check-text">Tax exempt <span class="checkout-hint">(certificate
+                                required)</span></span>
+                    </label>
+                    <label class="checkout-check-label" style="margin-top:8px;">
+                        <input type="checkbox" checked onchange={handlePartialShipChange} />
+                        <span class="checkout-check-text checkout-partial-bold">I accept partial shipments.</span>
+                        <a href="#" class="checkout-link" onclick={handleLearnMore}>Learn more</a>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 2: Shipping Method | INCO Terms | Upload Documents -->
+        <div class="checkout-row3" style="margin-top:16px;">
+            <div class="checkout-col">
+                <label class="checkout-label">Shipping method</label>
+                <p class="checkout-static-val">{checkoutShippingLabel}</p>
+            </div>
+            <div class="checkout-col">
+                <label class="checkout-label">INCO Terms</label>
+                <p class="checkout-static-val">{incoTerms}</p>
+            </div>
+            <div class="checkout-col">
+                <label class="checkout-label">Upload documents</label>
+                <div class="checkout-upload-row">
+                    <label class="checkout-browse-btn">
+                        Browse files
+                        <input type="file" accept=".pdf,.doc,.docx,.jpg,.png" onchange={handleDocumentUpload}
+                            style="display:none;" />
+                    </label>
+                    <span class="checkout-formats">Accepted formats:<br />PDF, Word, JPG, PNG</span>
+                </div>
+                <template if:true={uploadedDocName}>
+                    <div class="checkout-file-row">
+                        <lightning-icon icon-name="doctype:pdf" size="x-small" alternative-text="file"></lightning-icon>
+                        <span class="checkout-file-name">{uploadedDocName}</span>
+                        <button class="checkout-file-delete" onclick={handleRemoveDoc}>
+                            <c-abt-delete-icon size="sm" alternative-text="Remove"></c-abt-delete-icon>
+                        </button>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- Row 3: Billing Address | Shipping Address -->
+        <div class="checkout-row2" style="margin-top:16px;">
+            <div class="checkout-col">
+                <label class="checkout-label">Choose billing address <span class="checkout-required">*</span></label>
+                <template for:each={billingAddresses} for:item="addr">
+                    <div key={addr.Id} class="checkout-addr-option">
+                        <input type="radio" name="billingAddr" value={addr.Id} checked={addr.isSelected}
+                            onchange={handleBillingAddrChange} />
+                        <span class="checkout-addr-text">{addr.displayAddress}</span>
+                    </div>
+                </template>
+                <template if:false={hasBillingAddresses}>
+                    <p class="checkout-no-addr">No billing addresses found.</p>
+                </template>
+                <a href="#" class="checkout-new-addr" onclick={handleNewBillingAddress}>+ New billing address</a>
+            </div>
+            <div class="checkout-col">
+                <label class="checkout-label">Choose shipping address <span class="checkout-required">*</span></label>
+                <template for:each={shippingAddresses} for:item="addr">
+                    <div key={addr.Id} class="checkout-addr-option">
+                        <input type="radio" name="shippingAddr" value={addr.Id} checked={addr.isSelected}
+                            onchange={handleShippingAddrChange} />
+                        <span class="checkout-addr-text">{addr.displayAddress}</span>
+                    </div>
+                </template>
+                <template if:false={hasShippingAddresses}>
+                    <p class="checkout-no-addr">No shipping addresses found.</p>
+                </template>
+                <a href="#" class="checkout-new-addr" onclick={handleNewShippingAddress}>+ New shipping address</a>
+            </div>
+        </div>
+
+        <!-- Quote summary table -->
+        <div class="checkout-table-wrap">
+            <table class="checkout-table">
+                <thead>
+                    <tr>
+                        <th class="checkout-th">Quote ID</th>
+                        <th class="checkout-th">Product</th>
+                        <th class="checkout-th">Project</th>
+                        <th class="checkout-th">Sequences</th>
+                        <th class="checkout-th">Groups</th>
+                        <th class="checkout-th">Guaranteed Ship Date</th>
+                        <th class="checkout-th">Total Price</th>
+                        <th class="checkout-th checkout-th-icon"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="checkout-row">
+                        <td class="checkout-td checkout-td-bold">{quoteId}</td>
+                        <td class="checkout-td">{productName}</td>
+                        <td class="checkout-td">{projectName}</td>
+                        <td class="checkout-td">{sequenceCount}</td>
+                        <td class="checkout-td">{groupCount}</td>
+                        <td class="checkout-td">{shipDate}</td>
+                        <td class="checkout-td checkout-td-price">{totalPrice}</td>
+                        <td class="checkout-td checkout-td-icon">
+                            <c-abt-delete-icon size="sm" alternative-text="Delete"
+                                class="checkout-delete-icon"></c-abt-delete-icon>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Notes | Promo Code | Totals -->
+        <div class="checkout-bottom-row">
+            <div class="checkout-notes-col">
+                <label class="checkout-label">Special Requests</label>
+                <textarea class="checkout-notes-area" value={checkoutNotes} onchange={handleNotesChange}
+                    placeholder="Enter any special instructions or notes for this order..."></textarea>
+            </div>
+            <div class="checkout-promo-col">
+                <label class="checkout-label">Promo code</label>
+                <lightning-input type="text" value={promoCode} onchange={handlePromoChange}
+                    variant="label-hidden"></lightning-input>
+            </div>
+            <div class="checkout-totals-section">
+                <div class="checkout-total-row">
+                    <span class="checkout-total-label">Subtotal:</span>
+                    <span class="checkout-total-value">{subtotal}</span>
+                </div>
+                <div class="checkout-total-row">
+                    <span class="checkout-total-label">Shipping:</span>
+                    <span class="checkout-total-value">{shipping}</span>
+                </div>
+                <div class="checkout-total-row">
+                    <span class="checkout-total-label">Packaging:</span>
+                    <span class="checkout-total-value">{packaging}</span>
+                </div>
+                <div class="checkout-total-row checkout-grand-row">
+                    <span class="checkout-grand-label">TOTAL:</span>
+                    <span class="checkout-grand-value">{grandTotal}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="checkout-footer">
+            <button class="checkout-cancel-btn" onclick={handleCancel}>Cancel</button>
+            <button class="checkout-submit-btn" onclick={handlePlaceOrder} disabled={isCheckingOut}>
+                <template if:true={isCheckingOut}>Processing...</template>
+                <template if:false={isCheckingOut}>Place Order</template>
+            </button>
+        </div>
+
+    </div>
+            <!-- Add/Edit address modal -->
+            <template if:true={isAddressModalOpen}>
+                <section role="dialog" tabindex="-1" aria-modal="true" class="slds-modal slds-fade-in-open slds-modal_medium">
+                    <div class="slds-modal__container">
+                        <header class="slds-modal__header">
+                            <h2 class="slds-modal__title slds-hyphenate">{addressModalType} Address</h2>
+                            <button type="button" class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                                title="Close" onclick={closeAddressModal}>
+                                <lightning-icon icon-name="utility:close" alternative-text="Close" size="small"></lightning-icon>
+                            </button>
+                        </header>
+                        <div class="slds-modal__content slds-p-around_medium">
+                            <c-abt-address-form
+                                in-modal
+                                account-id={checkoutAccountId}
+                                record-id={addressModalRecordId}
+                                address-type={addressModalType}
+                                onsuccess={handleAddressModalSuccess}
+                                onclose={closeAddressModal}
+                            ></c-abt-address-form>
+                        </div>
+                    </div>
+                </section>
+                <div class="slds-backdrop slds-backdrop_open"></div>
+            </template>
+    
+        <!-- Loading overlay -->
+        <template if:true={isLoadingCheckout}>
+            <div class="checkout-loading-overlay">
+                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            </div>
+    </template>
+
+</template>

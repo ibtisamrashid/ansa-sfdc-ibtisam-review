@@ -1,0 +1,320 @@
+<template>
+    <template if:true={isAccountDetailsLoading}>
+        <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+    </template>
+
+    <template if:false={isAccountDetailsLoading}>
+        <div class="page-wrapper">
+            <h1 class="page-title">My Account</h1>
+
+            <!-- 1. AOTG summary tiles (visibility controlled by Account Stat Visibility fields) -->
+            <template if:true={hasVisibleSummaryTiles}>
+                <div class="summary-grid">
+                    <template if:true={showSavedWithGuarantee}>
+                        <div class="summary-card summary-card_saved">
+                            <div class="summary-value">{savedAmount}</div>
+                            <div class="summary-label">SAVED W/GUARANTEE</div>
+                            <p class="summary-subtext">{savedAmountSubtext}</p>
+                        </div>
+                    </template>
+                    <template if:true={showOnTimeShipment}>
+                        <div class="summary-card summary-card_ontime">
+                            <div class="summary-value">{onTimePercent}</div>
+                            <div class="summary-label">On-Time Shipment</div>
+                            <p class="summary-subtext">{onTimeSubtext}</p>
+                        </div>
+                    </template>
+                    <template if:true={showSequencesShipped}>
+                        <div class="summary-card summary-card_shipped">
+                            <div class="summary-value">{sequencesShippedPercent}</div>
+                            <div class="summary-label">Total Sequences Shipped</div>
+                            <p class="summary-subtext">{sequencesShippedSubtext}</p>
+                        </div>
+                    </template>
+                    <template if:true={showSequencesRejected}>
+                        <div class="summary-card summary-card_rejected">
+                            <div class="summary-value">{sequencesRejectedPercent}</div>
+                            <div class="summary-label">Sequences REJECTED</div>
+                            <p class="summary-subtext">{sequencesRejectedSubtext}</p>
+                        </div>
+                    </template>
+                </div>
+            </template>
+
+            <!-- 2. Account Information + Addresses -->
+            <div class="two-col-grid">
+
+                <!-- Account Information -->
+                <div class="section">
+                    <div class="section-header">
+                        <span class="section-title">Account Information</span>
+                        <button type="button" class="icon-btn icon-btn_account" title="Edit" aria-label="Edit"
+                            onclick={showAccountModal}>
+                            <c-abt-account-edit-icon alternative-text="Edit"></c-abt-account-edit-icon>
+                        </button>
+                    </div>
+                    <template if:true={accountRecordId}>
+                        <div class="info-grid">
+                            <div class="info-field">
+                                <div class="info-label">ACCOUNT NAME</div>
+                                <div class="info-value">{accountName}</div>
+                            </div>
+                            <div class="info-field">
+                                <div class="info-label">CATEGORY</div>
+                                <div class="info-value">{accountCategory}</div>
+                            </div>
+                            <div class="info-field">
+                                <div class="info-label">INDUSTRY</div>
+                                <div class="info-value">{accountIndustry}</div>
+                            </div>
+                            <div class="info-field">
+                                <div class="info-label">INVOICE EMAIL</div>
+                                <div class="info-value">{invoiceEmail}</div>
+                            </div>
+                            <div class="info-field">
+                                <div class="info-label">TAX EXEMPT</div>
+                                <div class="info-value">{accountTaxExempt}</div>
+                            </div>
+                            <div class="info-field">
+                                <div class="info-label">TAX ID/VAT</div>
+                                <div class="info-value">{accountTaxId}</div>
+                            </div>
+                            <div class="info-field">
+                                <div class="info-label">ALWAYS ACCEPT PARTIAL</div>
+                                <div class="info-value">{accountAlwaysAcceptPartial}</div>
+                            </div>
+                            <div class="info-field">
+                                <div class="info-label">SALES REP EMAIL</div>
+                                <div class="info-value">{accountSalesRepEmail}</div>
+                            </div>
+                            <div class="info-field info-field_full">
+                                <div class="info-label">SALES REP</div>
+                                <div class="info-value">{accountSalesRep}</div>
+                            </div>
+                            <template if:true={ownerCalendlyLink}>
+                                <div class="info-field info-field_full">
+                                    <button type="button" class="book-meeting-btn"
+                                        onclick={openCalendly}>Book a Meeting</button>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Addresses -->
+                <div class="section">
+                    <div class="section-header section-header_no-margin">
+                        <span class="section-title">Addresses</span>
+                        <template if:true={isShippingActive}>
+                            <a href="javascript:void(0)" class="add-link" onclick={handleAddShippingNavigation}>+ Add
+                                Shipping Address</a>
+                        </template>
+                        <template if:true={isBillingActive}>
+                            <a href="javascript:void(0)" class="add-link" onclick={handleAddBillingNavigation}>+ Add
+                                Billing Address</a>
+                        </template>
+                    </div>
+
+                    <!-- Tabs -->
+                    <div class="tab-nav">
+                        <button type="button" class={shippingTabClass}
+                            onclick={setAddressTabShipping}>Shipping</button>
+                        <button type="button" class={billingTabClass}
+                            onclick={setAddressTabBilling}>Billing</button>
+                    </div>
+
+                    <template if:true={addressError}>
+                        <p class="payment-error-text">{addressError}</p>
+                    </template>
+
+                    <!-- Address list -->
+                    <div class="address-list-wrapper">
+                        <template if:true={isAddressesBusy}>
+                            <div class="address-loading-overlay">
+                                <lightning-spinner alternative-text="Loading addresses"
+                                    size="small"></lightning-spinner>
+                            </div>
+                        </template>
+                        <div class="address-list">
+                        <template for:each={currentAddressList} for:item="addr">
+                            <div key={addr.Id} class="address-card">
+                                <div class="address-card-top">
+                                    <div class="address-line">{addr.displayAddress}</div>
+                                    <template if:true={addr.isDefault}>
+                                        <span class="default-badge">DEFAULT</span>
+                                    </template>
+                                </div>
+                                <div class="address-actions">
+                                    <button type="button" class="icon-btn icon-btn_account" title="Edit" aria-label="Edit"
+                                        data-id={addr.Id} onclick={handleAddressEdit}>
+                                        <c-abt-account-edit-icon alternative-text="Edit"></c-abt-account-edit-icon>
+                                    </button>
+                                    <button type="button" class="icon-btn icon-btn_account" title="Delete"
+                                        aria-label="Delete" data-id={addr.Id} onclick={handleAddressDelete}>
+                                        <c-abt-account-delete-icon alternative-text="Delete"></c-abt-account-delete-icon>
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+                        <template if:false={hasCurrentAddresses}>
+                            <p class="empty-text">No addresses.</p>
+                        </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Payment Methods -->
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-title">Payment Methods</span>
+                    <a href="javascript:void(0)" class="add-link" onclick={handleAddPaymentMethod}>+ Add Payment
+                        Method</a>
+                </div>
+                <template if:true={paymentMethodError}>
+                    <p class="payment-error-text">{paymentMethodError}</p>
+                </template>
+                <div class="table-wrapper payment-table-wrapper">
+                    <template if:true={isPaymentMethodsBusy}>
+                        <div class="payment-loading-overlay">
+                            <lightning-spinner alternative-text="Loading payment methods"
+                                size="small"></lightning-spinner>
+                        </div>
+                    </template>
+                    <template if:true={hasPaymentMethods}>
+                        <table class="payment-table">
+                            <thead>
+                                <tr>
+                                    <th class="pay-col-name">CARDHOLDER NAME</th>
+                                    <th class="pay-col-number">CARD NUMBER</th>
+                                    <th class="pay-col-expiry">EXPIRATION DATE</th>
+                                    <th class="pay-col-created">CREATED DATE</th>
+                                    <th class="pay-col-action" aria-hidden="true"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={paymentMethods} for:item="pm">
+                                    <tr key={pm.Id} class="pay-row">
+                                        <td class="pay-col-name">{pm.ABT_Card_Holder_Name__c}</td>
+                                        <td class="pay-col-number">{pm.formattedCardNumber}</td>
+                                        <td class="pay-col-expiry">{pm.formattedExpiration}</td>
+                                        <td class="pay-col-created">{pm.formattedCreatedDate}</td>
+                                        <td class="pay-col-action">
+                                            <div class="pay-actions">
+                                                <button type="button" class="icon-btn icon-btn_account" data-id={pm.Id}
+                                                    onclick={handlePaymentEdit} title="Edit" aria-label="Edit">
+                                                    <c-abt-account-edit-icon alternative-text="Edit"></c-abt-account-edit-icon>
+                                                </button>
+                                                <button type="button" class="icon-btn icon-btn_account" data-id={pm.Id}
+                                                    onclick={handlePaymentDelete} title="Delete" aria-label="Delete">
+                                                    <c-abt-account-delete-icon alternative-text="Delete"></c-abt-account-delete-icon>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </template>
+                    <template if:false={hasPaymentMethods}>
+                        <p class="empty-text">No payment methods.</p>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add payment method modal -->
+        <template if:true={isAddPaymentMethodModalOpen}>
+            <section role="dialog" tabindex="-1" aria-modal="true"
+                class="slds-modal slds-fade-in-open slds-modal_medium">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <h2 class="slds-modal__title slds-hyphenate">Add New Credit Card</h2>
+                        <button type="button"
+                            class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                            title="Close" onclick={handlePaymentMethodSaveAndClose}>
+                            <lightning-icon icon-name="utility:close" alternative-text="Close"
+                                size="small"></lightning-icon>
+                        </button>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_medium">
+                        <iframe title="Add payment method" height="300px" width="100%"
+                            src={paymentMethodIframeUrl}></iframe>
+                        <div class="slds-m-top_medium">
+                            <lightning-button label="Save & Close" onclick={handlePaymentMethodSaveAndClose}
+                                variant="brand"></lightning-button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+
+        <!-- Account edit modal -->
+                <!-- Account edit modal -->
+                <template if:true={isShowAccountModal}>
+                    <section role="dialog" tabindex="-1" aria-modal="true"
+                        class="slds-modal slds-fade-in-open slds-modal_medium">
+                        <div class="slds-modal__container">
+                            <header class="slds-modal__header">
+                                <h2 class="slds-modal__title slds-hyphenate">Edit Account Information</h2>
+                                <button type="button"
+                                    class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                                    title="Close" onclick={hideAccountModal}>
+                                    <lightning-icon icon-name="utility:close" alternative-text="Close"
+                                        size="small"></lightning-icon>
+                                </button>
+                            </header>
+                            <div class="slds-modal__content slds-p-around_medium">
+                                <template if:true={accountRecordId}>
+                                    <lightning-record-edit-form record-id={accountRecordId} object-api-name="Account"
+                                        onsuccess={hideAccountModal}>
+                                        <lightning-layout multiple-rows>
+                                            <lightning-layout-item class="slds-p-around_x-small" size="6"><lightning-input-field
+                                                    field-name="Name"></lightning-input-field></lightning-layout-item>
+                                            <lightning-layout-item class="slds-p-around_x-small" size="6"><lightning-input-field
+                                                    field-name="Industry"></lightning-input-field></lightning-layout-item>
+                                            <lightning-layout-item class="slds-p-around_x-small" size="6"><lightning-input-field
+                                                    field-name="Tax_Exempt__c"></lightning-input-field></lightning-layout-item>
+                                            <lightning-layout-item class="slds-p-around_x-small" size="6"><lightning-input-field
+                                                    field-name="Always_Accept_Partial__c"></lightning-input-field></lightning-layout-item>
+                                            <lightning-layout-item class="slds-p-around_x-small" size="6"><lightning-input-field
+                                                    field-name="Category__c"></lightning-input-field></lightning-layout-item>
+                                            <lightning-layout-item class="slds-p-around_x-small" size="6">
+                                                <lightning-input type="email" label="Invoice Email" value={invoiceEmail}
+                                                    onchange={handleInvoiceEmailChange}></lightning-input>
+                                            </lightning-layout-item>
+                                            <lightning-layout-item class="slds-p-around_x-small" size="6"><lightning-input-field
+                                                    field-name="Tax_ID_VAT__c"></lightning-input-field></lightning-layout-item>
+                                            <lightning-layout-item class="slds-p-around_x-small" size="6"><lightning-input-field
+                                                    field-name="Sales_Rep_Email__c"></lightning-input-field></lightning-layout-item>
+                                            <lightning-layout-item class="slds-p-around_x-small" size="12">
+                                                <lightning-button variant="brand" type="submit" label="Save"
+                                                    class="slds-m-right_x-small"></lightning-button>
+                                                <lightning-button variant="neutral" label="Cancel"
+                                                    onclick={hideAccountModal}></lightning-button>
+                                            </lightning-layout-item>
+                                        </lightning-layout>
+                                    </lightning-record-edit-form>
+                                </template>
+                            </div>
+                        </div>
+                    </section>
+                    <div class="slds-backdrop slds-backdrop_open"></div>
+                </template>
+        
+                <!-- Add/Edit address modal -->
+                <template if:true={isAddressModalOpen}>
+                    <c-abt-address-form-model-wrapper title={addressModalTitle} onclose={closeAddressModal}>
+                        <c-abt-address-form
+                            in-modal
+                            account-id={accountRecordId}
+                            record-id={addressModalRecordId}
+                            address-type={addressModalType}
+                            onsuccess={handleAddressModalSuccess}
+                            onclose={closeAddressModal}
+                        ></c-abt-address-form>
+                    </c-abt-address-form-model-wrapper>
+                </template>
+            </template>
+        </template>

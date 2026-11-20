@@ -1,0 +1,1288 @@
+<template>
+
+    <template if:true={isCheckoutButtonVisible}>
+        <lightning-button variant="brand" icon-name="utility:add" label="Add Sequence"
+            onclick={handleAddRecordButtonClick} disabled={isProjectDisabled}>
+        </lightning-button>
+    </template>
+
+    <button type="button" class="slds-button slds-button_outline-brand abt-dl-action-btn slds-m-left_x-small slds-m-right_x-small"
+        title="Only use the provided template for uploading sequences" onclick={handleCsvTemplate}>
+        <c-abt-download-icon size="sm" alternative-text="Download"></c-abt-download-icon>
+        CSV Template
+    </button>
+
+    <lightning-button class="slds-m-left_x-small slds-m-right_x-small" variant="brand-outline"
+        icon-name="utility:upload" label="Upload CSV" onclick={handleUploadCsv} disabled={isProjectDisabled}>
+    </lightning-button>
+
+    <lightning-button class="slds-m-left_x-small slds-m-right_x-small" variant="brand-outline"
+        icon-name="utility:upload" label="Upload FASTA" onclick={handleUploadFasta} disabled={isProjectDisabled}>
+    </lightning-button>
+
+    <template if:true={showVectorFeatures}>
+        <lightning-button class="slds-m-left_x-small slds-m-right_x-small" variant="brand-outline"
+            icon-name="utility:multi_select_checkbox" label="Bulk Vector Selection"
+            title="Apply a single vector to all checked rows" onclick={handleBulkVectorSelection}
+            disabled={isProjectDisabled}>
+        </lightning-button>
+    </template>
+
+    <template if:true={showVectorFeatures}>
+        <button type="button" class="slds-button slds-button_outline-brand abt-dl-action-btn slds-m-left_x-small slds-m-right_x-small"
+            title="Download Genbank sequence files" onclick={handleGenbankDownload} disabled={isGenbankButtonDisabled}
+            data-id="genbankBtn">
+            <c-abt-download-icon size="sm" alternative-text="Download"></c-abt-download-icon>
+            Download Genbank
+        </button>
+    </template>
+
+
+    <br><br>
+
+    <!-- Default Vector Display -->
+    <template if:true={showVectorFeatures}>
+        <div class="slds-m-bottom_medium">
+            <div class="slds-text-body_small slds-text-color_default">
+                <strong>Current Default Vector:</strong> {defaultVectorName}
+            </div>
+        </div>
+    </template>
+
+    <lightning-card if:true={isTableVisible} title="Sequences"
+        icon-name="standard:crypto_transaction_envelope_change_snapshot">
+
+        <div slot="actions">
+            <template if:true={rowsAwaitingClassification.size}>
+                <div class="slds-media slds-media_center">
+                    <div class="slds-media__body">
+                        <a href="javascript:void(0);" class="game-trigger-link game-trigger-link-bold"
+                            onclick={handleGameLinkClick} title="Play a mini-game while you wait">
+                            How about a game while you wait?
+                        </a>
+                        <span class="slds-m-horizontal_small">|</span>
+                        <span class="pending-classification-status">
+                            Calculating Sequence Classification & Pricing
+                            <span class="dot-loading">
+                                <span class="dot dot1"></span>
+                                <span class="dot dot2"></span>
+                                <span class="dot dot3"></span>
+                            </span>
+                        </span>
+                    </div>
+                </div>
+            </template>
+            <template if:true={showClassificationComplete}>
+                <div class="slds-media slds-media_center">
+                    <div class="slds-media__figure">
+                        <lightning-icon icon-name="utility:check" size="small" variant="success"></lightning-icon>
+                    </div>
+                    <div class="slds-media__body">
+                        <span class="slds-text-color_success">Sequence Classification & Pricing Complete</span>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <div class="csv-drop-zone" ondragover={handleDragOver} ondragleave={handleDragLeave} ondrop={handleDrop}
+            data-drag-active={isDragActive}>
+            <template if:true={isDragActive}>
+                <div
+                    class="slds-is-absolute slds-grid slds-grid_vertical slds-grid_align-center slds-media_center drag-prompt">
+                    <lightning-icon icon-name="utility:upload" size="medium"
+                        alternative-text="Drop CSV file here"></lightning-icon>
+                    <p class="slds-m-top_small slds-text-color_default slds-text-heading_small">Drop CSV file here to
+                        upload</p>
+                </div>
+            </template>
+            <template if:true={requestQuotes}>
+                <template if:false={isProjectDisabled}>
+                    <!-- <lightning-datatable key-field="id" data={requestQuotes} columns={columns} onrowaction={handleRowAction}
+                        oncellchange={handleCellChange} hide-checkbox-column={hideCheckboxColumn} show-row-number-column>
+                    </lightning-datatable> -->
+                    <c-a-b-t_custom-data-table key-field="id" data={requestQuotes} columns={columns}
+                        onrowaction={handleRowAction} onpicklistchange={handleVectorPicklistChange}
+                        hide-checkbox-column={hideCheckboxColumn} show-row-number-column>
+                    </c-a-b-t_custom-data-table>
+                </template>
+                <template if:true={isProjectDisabled}>
+                    <lightning-datatable key-field="id" data={requestQuotes} columns={columns3}
+                        hide-checkbox-column="true" show-row-number-column>
+                    </lightning-datatable>
+                </template>
+            </template>
+            <template if:true={error}>
+                <div class="slds-text-color_error">
+                    Error loading requestQuotes: {error.body.message}
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+
+    <template if:true={hasSequenceErrors}>
+        <lightning-icon icon-name="utility:error" size="x-small" alternative-text="Invalid characters"
+            title="Invalid characters"></lightning-icon>
+        <span class="tooltip" style="font-size:0.8rem;">&nbsp;= {sequenceCharacterErrorMessage}</span>
+        <br>
+    </template>
+    <template if:true={hasSequenceNameErrors}>
+        <lightning-icon icon-name="utility:ban" size="x-small" alternative-text="Invalid characters"
+            title="Invalid characters"></lightning-icon>
+        <span class="tooltip" style="font-size:0.8rem;">&nbsp;= Your sequence name contains invalid characters.</span>
+        <br>
+    </template>
+    <template if:true={hasLengthErrors}>
+        <lightning-icon icon-name="utility:warning" size="x-small" alternative-text="Incorrect length"
+            title="Incorrect length"></lightning-icon>
+        <template if:true={showVectorFeatures}>
+            <span class="tooltip" style="font-size:0.8rem;">&nbsp;= {sequenceLengthErrorMessage}</span>
+        </template>
+        <template if:false={showVectorFeatures}>
+            <span class="tooltip" style="font-size:0.8rem;">&nbsp;= {sequenceLengthErrorMessage}</span>
+        </template>
+        <br>
+    </template>
+    <template if:true={showVectorFeatures}>
+        <template if:true={hasVectorErrors}>
+            <lightning-icon icon-name="utility:info" size="x-small" alternative-text="Vector Required"
+                title="Vector Required"></lightning-icon>
+            <span class="tooltip" style="font-size:0.8rem;">&nbsp;= {vectorRequiredTooltipMessage}</span>
+            <br>
+        </template>
+    </template>
+    <br>
+
+    <div class="slds-m-bottom_small slds-text-body_regular slds-text-color_default">
+        Please review all sequences before checking out your quote. All orders are final.
+    </div>
+
+    <button type="button" class="slds-button slds-button_outline-brand abt-dl-action-btn slds-m-left_x-small slds-m-right_x-small"
+        onclick={handlePdfDownlaod} disabled={isPdfButtonDisabled}>
+        <c-abt-download-icon size="sm" alternative-text="Download"></c-abt-download-icon>
+        Quote PDF
+    </button>
+
+    <template if:true={isIDTChannelPartnership}>
+        <button type="button" class="slds-button slds-button_outline-brand abt-dl-action-btn slds-m-left_x-small slds-m-right_x-small"
+            onclick={handleEndCustomerPdfDownload} disabled={isPdfButtonDisabled}>
+            <c-abt-download-icon size="sm" alternative-text="Download"></c-abt-download-icon>
+            End Customer PDF
+        </button>
+    </template>
+
+    <button type="button" class="slds-button slds-button_outline-brand abt-dl-action-btn slds-m-left_x-small slds-m-right_x-small"
+        onclick={handleCsvDownlaod}>
+        <c-abt-download-icon size="sm" alternative-text="Download"></c-abt-download-icon>
+        DOWNLOAD SEQUENCES
+    </button>
+
+    <template if:true={isCheckoutButtonVisible}>
+        <lightning-button class="slds-m-left_x-small" variant="brand" label="Checkout" onclick={handlePrevieweOrder}
+            disabled={isOrderDisabled}>
+        </lightning-button>
+    </template>
+
+    <!-- Volume Discount Status Display - Separate line -->
+    <template if:true={showVolumeDiscountStatus}>
+        <div class="slds-m-top_small slds-text-align_right">
+            <div class="slds-badge slds-badge_success slds-text-body_small">
+                <lightning-icon icon-name="utility:success" size="x-small"
+                    class="slds-m-right_xx-small"></lightning-icon>
+                Volume Discount: {volumeDiscountPercentage}% off ({currentSequenceCount} sequences)
+            </div>
+        </div>
+    </template>
+
+    <br>
+    <template if:true={showError}>
+        <span class="tooltip"
+            style="font-size:0.8rem; color: red; margin-top: 0.5rem; display: inline-block;">&nbsp;&nbsp;There are
+            errors in your sequences. Please fix them before checking out.</span>
+    </template>
+
+    <template if:true={isPendingApproval}>
+        <span class="tooltip" style="font-size:0.8rem; margin-top: 0.5rem; display: inline-block;">&nbsp;&nbsp;Your
+            sales rep has been notified about this quote and will reach out to you to assist with the ordering
+            process.</span>
+    </template>
+
+    <!-- Line Item Insert/Update/Delete Modal -->
+    <template if:true={isModalOpen}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <div class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        title="Close" onclick={closeModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="close"
+                            size="small"></lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 class="slds-text-heading_medium">
+                        <template if:true={isUpdating}>Edit Sequence</template>
+                        <template if:true={isInserting}>Add Sequence</template>
+                        <template if:true={isDeleting}>Delete Sequence</template>
+                        <!-- <template if:true={isPreviewOrder}>Preview Order</template> -->
+                        <template if:true={isOrderedSuccess}>Order Placed</template>
+                    </h2>
+                </div>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <!-- New Line Item Modal -->
+                    <template if:true={isInserting}>
+                        <form onsubmit={handleSubmit}>
+                            <lightning-layout multiple-rows>
+                                <lightning-layout-item class="slds-p-around_small" size="12">
+                                    <lightning-input label="Sequence Name" value={modalSequenceName}
+                                        onchange={handleModalSequenceNameChange} required></lightning-input>
+                                </lightning-layout-item>
+                                <lightning-layout-item class="slds-p-around_small" size="12">
+                                    <lightning-textarea label="Sequence" value={modalSequenceText}
+                                        onchange={handleModalSequenceTextChange} required></lightning-textarea>
+                                </lightning-layout-item>
+                            </lightning-layout>
+                            <lightning-button variant="neutral" label="Cancel" onclick={closeModal}
+                                style="margin-right:20px"></lightning-button>
+                            <lightning-button variant="brand" type="submit" label="Save"></lightning-button>
+                            <template if:true={editFormError}>
+                                <div style="margin-top: 10px; line-height: 1rem;"><span class="slds-text-color_error"
+                                        style="font-size: 0.8rem;">{editFormError}</span></div>
+                            </template>
+                        </form>
+                    </template>
+                    <!-- Update Line Item Modal -->
+                    <template if:true={isUpdating}>
+                        <form onsubmit={handleSubmit}>
+                            <lightning-layout multiple-rows>
+                                <lightning-layout-item class="slds-p-around_small" size="6">
+                                    <lightning-input label="Sequence Name" value={modalSequenceName}
+                                        onchange={handleModalSequenceNameChange}></lightning-input>
+                                </lightning-layout-item>
+                                <lightning-layout-item class="slds-p-around_small" size="12">
+                                    <lightning-textarea label="Sequence" value={modalSequenceText}
+                                        onchange={handleModalSequenceTextChange}></lightning-textarea>
+                                </lightning-layout-item>
+                            </lightning-layout>
+                            <lightning-button variant="neutral" label="Cancel" onclick={closeModal}
+                                style="margin-right:20px"></lightning-button>
+                            <lightning-button type="submit" variant="brand" label="Save"></lightning-button>
+                            <template if:true={editFormError}>
+                                <div style="margin-top: 10px; line-height: 1rem;"><span class="slds-text-color_error"
+                                        style="font-size: 0.8rem;">{editFormError}</span></div>
+                            </template>
+                        </form>
+                    </template>
+                    <!-- Delete Line Item Modal -->
+                    <template if:true={isDeleting}>
+                        <h4>Are you sure you want to delete this sequence?</h4>
+
+                        <!-- Volume Discount Warning -->
+                        <template if:true={willDeleteRemoveVolumeDiscount}>
+                            <div class="slds-box slds-theme_warning slds-m-vertical_medium">
+                                <div class="slds-media slds-media_center">
+                                    <div class="slds-media__figure">
+                                        <lightning-icon icon-name="utility:warning" size="medium"
+                                            variant="warning"></lightning-icon>
+                                    </div>
+                                    <div class="slds-media__body">
+                                        <h5 class="slds-text-heading_small slds-m-bottom_x-small">Volume Discount Will
+                                            Be Removed</h5>
+                                        <p class="slds-text-body_regular">
+                                            <strong>Warning:</strong> Deleting this sequence will reduce your total to 4
+                                            sequences,
+                                            which will automatically remove your {volumeDiscountPercentage}% volume
+                                            discount.
+                                        </p>
+                                        <p class="slds-text-body_small slds-m-top_x-small">
+                                            You'll need to have 5 or more sequences to maintain the volume discount.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+                        <br>
+                        <lightning-button variant="neutral" label="Cancel" onclick={closeModal}></lightning-button>
+                        <lightning-button variant="destructive" label="Yes, Delete"
+                            onclick={onConfirmationOfDeleteQRLIRecord}></lightning-button>
+                    </template>
+                    <!-- <template if:true={isOrderedSuccess}>
+                        Order Placed Successfully! <br>
+                        Your Order Number is <h2>{orderInfo.OrderNumber}</h2><br><br>
+                        <lightning-button variant="neutral" label="Done" onclick={closeModal}></lightning-button>
+                    </template> -->
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- Preview Order Modal -->
+    <template if:true={isOrderPreviewModalOpen}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container ansa-preview-modal">
+                <div class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        title="Close" onclick={closeOrderPreviewModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="close"
+                            size="small"></lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 class="slds-text-heading_medium"> Preview Order</h2>
+                </div>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <lightning-record-view-form record-id={quoteRequestId} object-api-name="ABT_Quote_Request__c"
+                        key={formRefreshKey}>
+                        <lightning-layout multiple-rows>
+                            <lightning-layout-item class="slds-p-around_small" size="6">
+                                <lightning-output-field
+                                    field-name="ABT_Customer_Project_Name__c"></lightning-output-field>
+                            </lightning-layout-item>
+                            <lightning-layout-item class="slds-p-around_small" size="6">
+                                <lightning-output-field field-name="ABT_Requester_Name__c"></lightning-output-field>
+                            </lightning-layout-item>
+                            <lightning-layout-item class="slds-p-around_small" size="6">
+                                <template if:true={currentTotalPrice}>
+                                    <div class="slds-form-element slds-form-element_readonly">
+                                        <span class="slds-form-element__label">Total Price</span>
+                                        <div class="slds-form-element__control">
+                                            <div class="slds-form-element__static">{currentTotalPrice}</div>
+                                        </div>
+                                    </div>
+                                </template>
+                                <template if:false={currentTotalPrice}>
+                                    <lightning-output-field field-name="ABT_Total_Price__c"></lightning-output-field>
+                                </template>
+                            </lightning-layout-item>
+                        </lightning-layout>
+                    </lightning-record-view-form>
+                    <lightning-record-edit-form object-api-name="ABT_Quote_Request__c" record-id={quoteRequestId}
+                        onsubmit={handleOrderPreviewSubmit} onsuccess={handleUpdateQuoteRequestSuccess}>
+                        <lightning-layout multiple-rows>
+                            <lightning-layout-item class="slds-p-around_small" size="6">
+                                <lightning-input-field field-name="ABT_Payment_Method__c"
+                                    onchange={handlePaymentMethodTypeChange} required>
+                                </lightning-input-field>
+                            </lightning-layout-item>
+                            <lightning-layout-item class="slds-p-around_small" size="6">
+                                <lightning-input-field field-name="ABT_PO_Number__c"></lightning-input-field>
+                            </lightning-layout-item>
+                            <template if:true={isPartnerAccount}>
+                                <lightning-layout-item class="slds-p-around_small" size="6">
+                                    <lightning-input-field field-name="End_Customer_PO__c"></lightning-input-field>
+                                </lightning-layout-item>
+                            </template>
+                            <lightning-layout-item class="slds-p-around_small" size="6">
+                                <lightning-input-field field-name="Accept_Partial_Shipment__c"></lightning-input-field>
+                            </lightning-layout-item>
+
+                            <lightning-layout-item class="slds-p-around_small" size="6"
+                                if:true={isCreditCardFieldVisible}>
+                                <lightning-input-field style="display: none;" field-name="ABT_Payment_Method_Lookup__c"
+                                    value={selectedPaymentMethod}>
+                                </lightning-input-field>
+                                <lightning-radio-group required label="Choose Credit Card"
+                                    options={paymentMethodOptions} value={selectedPaymentMethod}
+                                    onchange={handlePaymentMethodSelection}>
+                                </lightning-radio-group>
+                                <template if:false={isPaymentMethodsAvailable}>
+                                    No Credit Cards found for you, Please add new one. <br>
+                                </template>
+                                <lightning-button label="New Credit Card" icon-name="utility:add" icon-position="left"
+                                    variant="base" onclick={handleNewCreditCard}>
+                                </lightning-button>
+                            </lightning-layout-item>
+                            <lightning-layout-item class="slds-p-around_small" size="6"
+                                if:true={isCreditCardFieldVisible}></lightning-layout-item>
+                            <template if:true={computedPromoCodeVisibility}>
+                                <lightning-layout-item class="slds-p-around_small" size="6">
+                                    <div class="slds-form-element">
+                                        <label class="slds-form-element__label slds-text-heading_small">Promo
+                                            Code</label>
+                                        <div class="slds-form-element__control">
+                                            <div class="slds-grid slds-gutters_x-small">
+                                                <div class="slds-col slds-size_3-of-4">
+                                                    <lightning-input type="text" label="Promo Code Input"
+                                                        variant="label-hidden" value={currentPromoCode}
+                                                        onchange={handlePromoCodeChange} placeholder="Enter promo code"
+                                                        disabled={isApplyingPromoCode}>
+                                                    </lightning-input>
+                                                </div>
+                                                <div class="slds-col slds-size_1-of-4">
+                                                    <lightning-button label="Apply" variant="brand"
+                                                        onclick={handleApplyPromoCode} disabled={isApplyingPromoCode}>
+                                                    </lightning-button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Messages appear below the grouped input and button -->
+                                        <template if:true={isApplyingPromoCode}>
+                                            <div class="slds-m-top_x-small">
+                                                <lightning-spinner alternative-text="Applying promo code..."
+                                                    size="x-small"></lightning-spinner>
+                                                <span class="slds-text-body_small slds-m-left_x-small">Applying promo
+                                                    code...</span>
+                                            </div>
+                                        </template>
+                                        <template if:true={promoCodeMessage}>
+                                            <div class={promoCodeMessageClass}>
+                                                <lightning-icon icon-name={promoCodeMessageIcon} size="x-small"
+                                                    class="slds-m-right_x-small"></lightning-icon>
+                                                <span class="slds-text-body_small">{promoCodeMessage}</span>
+                                            </div>
+                                        </template>
+                                    </div>
+                                    <!-- Hidden field for form submission -->
+                                    <lightning-input-field field-name="Promo_Code__c" value={computedPromoCodeValue}
+                                        class="slds-hide">
+                                    </lightning-input-field>
+                                </lightning-layout-item>
+                            </template>
+
+                            <lightning-layout-item class="slds-p-around_small" size="6">
+                                <lightning-combobox name="shippingMethod" label="Shipping Method"
+                                    value={selectedShippingMethod} placeholder="Select shipping method"
+                                    options={filteredShippingMethods} onchange={handleShippingMethodChange} required>
+                                </lightning-combobox>
+                                <lightning-input-field field-name="ABT_Shipping_Method__c"
+                                    value={selectedShippingMethod} style="display: none;">
+                                </lightning-input-field>
+                                <lightning-input-field field-name="Shipping_Destination__c" value={shippingDestination}
+                                    style="display: none;">
+                                </lightning-input-field>
+                            </lightning-layout-item>
+
+                            <lightning-layout-item class="slds-p-around_small" size="6">
+                                <lightning-input-field style="display: none;" field-name="ABT_Billing_Address_Lookup__c"
+                                    value={selectedBillingAddress}>
+                                </lightning-input-field>
+                                <lightning-radio-group required label="Choose Billing Address"
+                                    options={billingAddressOptions} value={selectedBillingAddress}
+                                    onchange={handleBillingAddressSelection}>
+                                </lightning-radio-group>
+                                <template if:false={isBillingAddressesAvailable}>
+                                    No Address Found, Please add Address
+                                </template>
+                                <lightning-button label="New Billing Address" icon-name="utility:add"
+                                    icon-position="left" variant="base" onclick={handleNewBillingAddress}>
+                                </lightning-button>
+                            </lightning-layout-item>
+                            <lightning-layout-item class="slds-p-around_small" size="6">
+                                <lightning-input-field style="display: none;"
+                                    field-name="ABT_Shipping_Address_Lookup__c" value={selectedShippingAddress}>
+                                </lightning-input-field>
+                                <lightning-radio-group required label="Choose Shipping Address"
+                                    options={shippingAddressOptions} value={selectedShippingAddress}
+                                    onchange={handleShippingAddressSelection}>
+                                </lightning-radio-group>
+                                <template if:false={isShippingAddressesAvailable}>
+                                    No Address Found, Please add Address
+                                </template>
+                                <lightning-button label="New Shipping Address" icon-name="utility:add"
+                                    icon-position="left" variant="base" onclick={handleNewShippingAddress}>
+                                </lightning-button>
+                            </lightning-layout-item>
+                        </lightning-layout>
+
+                        <!-- PO Document Upload Section -->
+                        <div class="slds-p-around_small">
+                            <div class="slds-form-element">
+                                <label class="slds-form-element__label slds-text-heading_small slds-text-title_bold">
+                                    Upload Document
+                                </label>
+                                <div class="slds-form-element__control">
+                                    <div class="slds-grid slds-gutters">
+                                        <div class="slds-col slds-size_4-of-12">
+                                            <lightning-button label="Browse Files" icon-name="utility:upload"
+                                                onclick={openPOFileSelector} variant="neutral"
+                                                class="slds-m-bottom_x-small" disabled={isUploadingPO}>
+                                            </lightning-button>
+                                            <input type="file" accept={poAcceptedFormats} onchange={handlePOFileSelect}
+                                                class="slds-hide" data-id="poFileInput" />
+                                        </div>
+                                        <div class="slds-col slds-size_8-of-12">
+                                            <template if:true={isUploadingPO}>
+                                                <div class="slds-is-relative slds-m-bottom_x-small">
+                                                    <lightning-spinner alternative-text="Uploading..."
+                                                        size="small"></lightning-spinner>
+                                                    <div class="slds-p-around_medium slds-text-align_center">
+                                                        Uploading...</div>
+                                                </div>
+                                            </template>
+                                            <template if:true={poFileName}>
+                                                <div class="slds-box slds-theme_shade slds-m-bottom_x-small">
+                                                    <div class="slds-grid slds-grid_vertical-align-center">
+                                                        <div class="slds-col">
+                                                            <lightning-icon icon-name="doctype:attachment"
+                                                                size="x-small"
+                                                                class="slds-m-right_x-small"></lightning-icon>
+                                                            <span>{poFileName}</span>
+                                                        </div>
+                                                        <div class="slds-col slds-text-align_right">
+                                                            <button type="button" class="abt-delete-action-btn"
+                                                                title="Remove file" aria-label="Remove file"
+                                                                onclick={handleRemovePOFile} disabled={isUploadingPO}>
+                                                                <c-abt-delete-icon size="sm"
+                                                                    alternative-text="Remove file"></c-abt-delete-icon>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                            <template if:false={poFileName}>
+                                                <div
+                                                    class="slds-box slds-theme_shade slds-m-bottom_x-small slds-text-color_weak">
+                                                    No file selected
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                    <template if:true={poUploadError}>
+                                        <div class="slds-text-color_error slds-m-top_x-small">
+                                            {poUploadError}
+                                        </div>
+                                    </template>
+                                    <div class="slds-text-body_small slds-m-top_xx-small">
+                                        Accepted formats: PDF, Word, JPG, PNG
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notes field -->
+                        <div class="slds-p-around_small">
+                            <div class="slds-form-element">
+                                <label
+                                    class="slds-form-element__label slds-text-heading_small slds-text-title_bold">Notes</label>
+                                <div class="slds-form-element__control">
+                                    <textarea class="slds-textarea" style="min-height: 120px;"
+                                        onchange={handleOrderNotesChange}
+                                        placeholder="Enter any special instructions or notes for this order..."></textarea>
+                                </div>
+                            </div>
+                            <lightning-input-field field-name="Notes__c" class="slds-hide" value={orderNotesValue}>
+                            </lightning-input-field>
+                        </div>
+
+                        <!-- Sequences section -->
+                        <template if:true={requestQuotes}>
+                            <lightning-card title="Sequences"
+                                icon-name="standard:crypto_transaction_envelope_change_snapshot">
+                                <lightning-datatable key-field="id" data={requestQuotes} columns={columns2}
+                                    hide-checkbox-column="true" show-row-number-column>
+                                </lightning-datatable>
+                            </lightning-card>
+                        </template>
+
+                        <br>
+
+                        <!-- Express Checkout Message -->
+                        <template if:true={rowsAwaitingClassification.size}>
+                            <div class="slds-box slds-theme_shade slds-m-bottom_medium">
+                                <div class="slds-text-heading_small slds-m-bottom_small">Express Checkout</div>
+                                <p>
+                                    The Ansa Sequence Classifier determines the Guarantee of a sequence. By checking out
+                                    prior to the completion of the sequence classification assessment you are
+                                    acknowledging:
+                                </p>
+                                <ul class="slds-list_dotted slds-m-vertical_small">
+                                    <li>Only Guaranteed sequences will be included in the Ansa On-Time Guarantee.</li>
+                                    <template if:false={allowsInternalNcpOrders}>
+                                        <li>Sequences assessed as Not Currently Possible will not be added to the order.
+                                        </li>
+                                    </template>
+                                </ul>
+                                <p>
+                                    Ansa will return the assessment results for all sequences in your order confirmation
+                                    email.
+                                </p>
+                            </div>
+                        </template>
+
+                        <!-- Not Currently Possible Sequences Message -->
+                        <template if:true={showSkippedNotCurrentlyPossibleSequences}>
+                            <div class="slds-box slds-theme_warning slds-m-bottom_medium">
+                                <div class="slds-media slds-media_center">
+                                    <div class="slds-media__figure">
+                                        <lightning-icon icon-name="utility:warning" size="small"
+                                            variant="warning"></lightning-icon>
+                                    </div>
+                                    <div class="slds-media__body">
+                                        <p>
+                                            <strong>One or more of your sequences on your quote are "Not Currently
+                                                Possible". Those sequences will not be included on your order.</strong>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+                        <template if:true={showOnlyNcpBlocked}>
+                            <div class="slds-box slds-theme_error slds-m-bottom_medium">
+                                <div class="slds-media slds-media_center">
+                                    <div class="slds-media__figure">
+                                        <lightning-icon icon-name="utility:error" size="small"
+                                            variant="error"></lightning-icon>
+                                    </div>
+                                    <div class="slds-media__body">
+                                        <p>
+                                            <strong>All sequences on this quote are "Not Currently Possible" and cannot
+                                                be ordered.</strong>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Add before the Place Order button -->
+                        <div class="slds-m-top_medium slds-m-bottom_medium">
+                            <template if:true={hasValidationErrors}>
+                                <div class="slds-text-color_error slds-m-bottom_small">
+                                    <lightning-icon icon-name="utility:warning" size="x-small"
+                                        class="slds-m-right_x-small"></lightning-icon>
+                                    Please fill in all required fields
+                                </div>
+                            </template>
+                        </div>
+
+                        <lightning-button variant="neutral" label="Cancel" onclick={closeOrderPreviewModal}
+                            style="margin-right:20px"></lightning-button>
+                        <lightning-button type="submit" disabled={isPlacesOrderButtonDisabled} variant="brand"
+                            label="Place Order"></lightning-button>
+                    </lightning-record-edit-form>
+
+                    <!-- New Address Model -->
+                    <template if:true={isNewAddressModelOpen}>
+                        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+                            <div class="slds-modal__container ansa-preview-modal">
+                                <div class="slds-modal__header">
+                                    <button
+                                        class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                                        title="Close" onclick={closeNewAddressModel}>
+                                        <lightning-icon icon-name="utility:close" alternative-text="close"
+                                            size="small"></lightning-icon>
+                                        <span class="slds-assistive-text">Close</span>
+                                    </button>
+                                    <h2 class="slds-text-heading_medium"> Add New {newAddressType} Address</h2>
+                                </div>
+                                <div class="slds-modal__content slds-p-around_medium">
+                                    <lightning-record-edit-form object-api-name="ContactPointAddress"
+                                        onsuccess={handleNewAddressSuccess}>
+                                        <lightning-layout multiple-rows>
+                                            <lightning-layout-item class="slds-p-around_small" size="6">
+                                                <lightning-input-field field-name="AddressType" value={newAddressType}
+                                                    disabled="True" required></lightning-input-field>
+                                                <lightning-input-field field-name="Name"
+                                                    required></lightning-input-field>
+                                                <!-- <lightning-input-field field-name="AddressLastName" required></lightning-input-field> -->
+                                                <lightning-input-field field-name="IsDefault"></lightning-input-field>
+                                            </lightning-layout-item>
+                                            <lightning-layout-item class="slds-p-around_small" size="6">
+                                                <lightning-input-field field-name="Address"
+                                                    required></lightning-input-field>
+                                            </lightning-layout-item>
+                                        </lightning-layout>
+                                        <lightning-input-field style="display:none" field-name="ParentId"
+                                            value={accountRecordId} required></lightning-input-field>
+                                        <br>
+                                        <lightning-button variant="neutral" label="Cancel"
+                                            onclick={closeNewAddressModel} style="margin-right:20px"></lightning-button>
+                                        <lightning-button variant="brand" type="submit" label="Add"></lightning-button>
+                                    </lightning-record-edit-form>
+                                </div>
+                            </div>
+                        </section>
+                        <div class="slds-backdrop slds-backdrop_open"></div>
+                    </template>
+
+                    <!-- New Credit Card Model -->
+                    <template if:true={isNewCreditCardModelOpen}>
+                        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+                            <div class="slds-modal__container ansa-preview-modal">
+                                <div class="slds-modal__header">
+                                    <button
+                                        class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                                        title="Close" onclick={handleCreditCardSaveAndClose}>
+                                        <lightning-icon icon-name="utility:close" alternative-text="close"
+                                            size="small"></lightning-icon>
+                                        <span class="slds-assistive-text">Close</span>
+                                    </button>
+                                    <h2 class="slds-text-heading_medium"> Add New Credit Card</h2>
+                                </div>
+                                <div class="slds-modal__content slds-p-around_medium">
+                                    <iframe height="300px" width="100%" src={vfPageUrlForCreditCard}>
+                                    </iframe>
+                                    <br><br>
+                                    <lightning-button label="Save & Close" onclick={handleCreditCardSaveAndClose}
+                                        variant="brand"></lightning-button>
+                                </div>
+                            </div>
+                        </section>
+                        <div class="slds-backdrop slds-backdrop_open"></div>
+                    </template>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- CSV Upload Modal -->
+    <template if:true={isCsvModalOpen}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <div class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        title="Close" onclick={closeCsvModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="close"
+                            size="small"></lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 class="slds-text-heading_medium"> Upload CSV</h2>
+                </div>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <template if:true={isCsvLoaded}>
+                        <div style="z-index: 10000 !important;">
+                            <lightning-spinner alternative-text="Uploading......" size="medium"
+                                style="z-index: 10000 !important;"></lightning-spinner>
+                        </div>
+                    </template>
+
+                    <div class="custom-csv-upload-container slds-var-p-horizontal_medium">
+                        <div class="slds-text-body_small slds-m-bottom_small">
+                            Please use the provided template for uploading sequences.
+                            <a href="javascript:void(0);" onclick={handleCsvTemplate}> Download template</a>
+                        </div>
+                        <lightning-input label="Select CSV" name="file uploader" onchange={handleFileSelect}
+                            accept={csvAcceptedFormats} type="file"></lightning-input>
+                        <p>{fileName}</p>
+                        <!-- Error message section -->
+                        <template if:true={csvUploadError}>
+                            <div class="slds-text-color_error slds-m-top_small slds-m-bottom_small">
+                                <lightning-icon icon-name="utility:error" size="x-small"
+                                    class="slds-m-right_x-small"></lightning-icon>
+                                <span>{csvUploadError}</span>
+                            </div>
+                        </template>
+                        <lightning-button class="upload-button" label="Upload" onclick={handleFileUpload}
+                            variant="brand" disabled={isCsvButtonDisabled}></lightning-button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- FASTA Upload Modal -->
+    <template if:true={isFastaModalOpen}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <div class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        title="Close" onclick={closeFastaModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="close"
+                            size="small"></lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 class="slds-text-heading_medium"> Upload FASTA</h2>
+                </div>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <template if:true={isFastaLoaded}>
+                        <div style="z-index: 10000 !important;">
+                            <lightning-spinner alternative-text="Uploading......" size="medium"
+                                style="z-index: 10000 !important;"></lightning-spinner>
+                        </div>
+                    </template>
+
+                    <div class="custom-fasta-upload-container slds-var-p-horizontal_medium">
+                        <lightning-input label="Select FASTA" name="file uploader" onchange={handleFastaFileSelect}
+                            accept={fastaAcceptedFormats} type="file" multiple></lightning-input>
+                        <p>{fastaFileName}</p>
+                        <lightning-button class="upload-button" label="Upload" onclick={handleFastaFileUpload}
+                            variant="brand" disabled={isFastaButtonDisabled}></lightning-button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- Volume Discount Offer Modal -->
+    <template if:true={isVolumeDiscountModalOpen}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <div class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        title="Close" onclick={closeVolumeDiscountModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="close"
+                            size="small"></lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 class="slds-text-heading_medium">
+                        <lightning-icon icon-name="utility:gift" size="small"
+                            class="slds-m-right_small"></lightning-icon>
+                        Special Volume Discount Offer!
+                    </h2>
+                </div>
+                <div class="slds-modal__content slds-p-around_large slds-text-align_center">
+
+                    <lightning-icon icon-name="utility:trending" size="large" variant="success"
+                        class="slds-m-bottom_medium"></lightning-icon>
+
+                    <h3 class="slds-text-heading_large slds-m-bottom_medium">Get {volumeDiscountPercentage}% Off Your
+                        Entire Order!</h3>
+
+                    <p class="slds-text-body_regular slds-m-bottom_large slds-text-color_default">
+                        You have <strong>{currentSequenceCount} sequences</strong> — add <strong>{sequencesNeeded}
+                            more</strong> to save {volumeDiscountPercentage}%
+                    </p>
+
+                    <div class="slds-box slds-theme_success slds-p-around_medium slds-m-bottom_large">
+                        <div class="slds-text-color_inverse">
+                            <lightning-icon icon-name="utility:clock" size="small" variant="inverse"
+                                class="slds-m-right_x-small"></lightning-icon>
+                            <strong>Limited Time Offer!</strong>
+                        </div>
+                    </div>
+
+                    <div class="slds-m-bottom_large">
+                        <lightning-button variant="brand" label="Yes, Get 10% Off!" onclick={handleAcceptVolumeDiscount}
+                            class="slds-button_stretch slds-p-around_small" style="font-size: 1rem; font-weight: bold;">
+                        </lightning-button>
+                    </div>
+
+                    <div>
+                        <lightning-button variant="base" label="No thanks, checkout now"
+                            onclick={handleDeclineVolumeDiscount}>
+                        </lightning-button>
+                    </div>
+
+                    <div class="slds-text-body_small slds-text-color_weak slds-m-top_medium">
+                        The discount applies automatically when you reach 5+ sequences
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- Download Quote PDF -->
+    <div class="quote-container" style="display: none;">
+        <div id="content" style="font-family: Arial, sans-serif; width: 80%;
+            margin: 0 auto; padding: 10px;
+            border: 1px solid #ddd;">
+            <div class="header">
+                <div class="company-address">
+                    <img src={ansaLogo} alt="Company Logo" style="  max-width: 150px; /* Adjust the logo size as needed */
+                        display: block;
+                        margin-bottom: 10px;"> <!-- Logo Image -->
+                    <h3>Ansa Biotechnologies, Inc.</h3>
+                    <p>1198 65th Street #250<br> Emeryville, California 94608<br> United States</p>
+                </div>
+            </div>
+            <br>
+            <div class="header">
+                <div class="company-address" style="width: 45%;
+                    display: inline-block;
+                    vertical-align: top;">
+                    <p>
+                        <b>Quote Request:</b> {quoteRequestInfo.quoteNumber}<br>
+                        <b>Contact Name:</b> {quoteRequestInfo.contactName}<br>
+                        <b>Contact Email:</b> {quoteRequestInfo.contactEmail}<br>
+                        <b>Created Date:</b> {quoteRequestCreatedDate}<br>
+                        <b>Expiration Date:</b> {quoteRequestInfo.expiryDate}<br>
+                        <b>Ship To Address:</b> {quoteRequestInfo.shipTo}
+                    </p>
+                </div>
+                <div class="quote-details" style="width: 45%;
+                    display: inline-block;
+                    vertical-align: top;text-align: right;">
+                    <p>
+                        <b>Account Name:</b> {quoteRequestInfo.accountName}<br>
+                        <b>Payment Terms:</b> {quoteRequestInfo.paymentTerms}<br>
+                        <b>Incoterms:</b> {quoteRequestInfo.incoTerms}<br>
+                        <b>Invoice Email:</b> {quoteRequestInfo.invoiceEmail}<br>
+                        <b>Bill To Address:</b> {quoteRequestInfo.billTo}
+                    </p>
+                </div>
+            </div>
+            <br>
+            <div class="table-container" style="margin-bottom: 20px;">
+                <table style="width: 100%;
+                    border-collapse: collapse; border: 1px solid #ddd;">
+                    <thead>
+                        <tr>
+                            <th style="border: 1px solid #ddd; padding: 10px;
+                                text-align: left;background-color: #f4f4f4;">
+                                Sequence Name
+                            </th>
+                            <th style="border: 1px solid #ddd; padding: 10px;
+                                text-align: left;background-color: #f4f4f4;">
+                                Product
+                            </th>
+                            <th style="border: 1px solid #ddd; padding: 10px;
+                                text-align: right;background-color: #f4f4f4;">
+                                Sequence Length
+                            </th>
+                            <th style="border: 1px solid #ddd;padding: 10px;
+                                text-align: left;background-color: #f4f4f4;">Quantity</th>
+                            <th style="border: 1px solid #ddd;padding: 10px;
+                                text-align: left;background-color: #f4f4f4;">Price (USD)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={requestQuotes} for:item="item">
+                            <tr key={item.Id}>
+                                <td style="border: 1px solid #ddd;padding: 10px;
+                                    text-align: left;">{item.ABT_Sequence_Name__c}</td>
+                                <td style="border: 1px solid #ddd;padding: 10px;
+                                    text-align: left;">{item.ABT_Product_Name__c}</td>
+                                <td style="border: 1px solid #ddd;padding: 10px;
+                                    text-align: right;">{item.ABT_Sequence_Length__c}</td>
+                                <td style="border: 1px solid #ddd;padding: 10px;
+                                    text-align: left;">{item.ABT_Quantity__c}</td>
+                                <td style="border: 1px solid #ddd;padding: 10px;
+                                    text-align: left;">${item.formatedPrice}</td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-container" style="margin-bottom: 20px;">
+                <table class="totals" style="width: 100%;
+                    border-collapse: collapse; border: 1px solid #ddd;">
+                    <tr>
+                        <td style="border: 1px solid #ddd;padding: 10px;
+                            text-align: left;">Subtotal</td>
+                        <td style="border: 1px solid #ddd;padding: 10px;
+                            text-align: left;">${quoteRequestInfo.subTotal}</td>
+                    </tr>
+                    <template if:true={quoteRequestInfo.formattedDiscount}>
+                        <tr>
+                            <td style="border: 1px solid #ddd;padding: 10px;
+                                text-align: left;">Discount</td>
+                            <td style="border: 1px solid #ddd;padding: 10px;
+                                text-align: left;">{quoteRequestInfo.formattedDiscount}</td>
+                        </tr>
+                    </template>
+                    <tr>
+                        <td style="border: 1px solid #ddd;padding: 10px;
+                            text-align: left;">Shipping Amount</td>
+                        <td style="border: 1px solid #ddd;padding: 10px;
+                            text-align: left;">${quoteRequestInfo.shippingAmount}</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd;padding: 10px;
+                            text-align: left;">Total Price</td>
+                        <td style="border: 1px solid #ddd;padding: 10px;
+                            text-align: left;">${quoteRequestInfo.totalPrice}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">Taxes will be determined at time of order.</td>
+                    </tr>
+                </table>
+                <br>
+                <b>Terms & Conditions:</b> {quoteRequestInfo.specialAgreementBeforeUrl}<a if:true={quoteRequestInfo.specialAgreementUrl} href={quoteRequestInfo.specialAgreementUrl} target="_blank">{quoteRequestInfo.specialAgreementUrl}</a>{quoteRequestInfo.specialAgreementAfterUrl}
+                <br><br>
+                <b>Purchase Order Instructions:</b> Please send all purchase orders and purchasing inquiries to&nbsp;<a href="mailto:customerservice@ansabio.com">customerservice@ansabio.com</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Download End Customer PDF -->
+    <div class="end-customer-pdf-container" style="display: none;">
+        <div id="end-customer-content" style="font-family: Arial, sans-serif; width: 80%;
+            margin: 0 auto; padding: 10px;
+            border: 1px solid #ddd;">
+            <div class="header">
+                <div class="company-address">
+                    <img src={ansaLogo} alt="Company Logo" style="  max-width: 150px;
+                        display: block;
+                        margin-bottom: 10px;">
+                    <h3>Ansa Biotechnologies, Inc.</h3>
+                    <p>1198 65th Street #250<br> Emeryville, California 94608<br> United States</p>
+                </div>
+            </div>
+            <br>
+            <div class="header">
+                <div class="company-address" style="width: 45%;
+                    display: inline-block;
+                    vertical-align: top;">
+                    <p>
+                        <b>Quote Request:</b> {quoteRequestInfo.quoteNumber}<br>
+                        <b>Contact Name:</b> {quoteRequestInfo.contactName}<br>
+                        <b>Contact Email:</b> {quoteRequestInfo.contactEmail}<br>
+                        <b>Created Date:</b> {quoteRequestCreatedDate}<br>
+                        <b>Expiration Date:</b> {quoteRequestInfo.expiryDate}<br>
+                        <b>Ansa Production TaT:</b> {quoteRequestInfo.AnsaProductionTaT}<br>
+                        <b>Total Project TaT:</b> {quoteRequestInfo.TotalProjectTaT}<br>
+                        <b>Ship To Address:</b> {quoteRequestInfo.shipTo}
+                    </p>
+                </div>
+                <div class="quote-details" style="width: 45%;
+                    display: inline-block;
+                    vertical-align: top;text-align: right;">
+                    <p>
+                        <b>Account Name:</b> {quoteRequestInfo.accountName}<br>
+                        <b>Payment Terms:</b> {quoteRequestInfo.paymentTerms}<br>
+                        <b>Incoterms:</b> {quoteRequestInfo.incoTerms}<br>
+                        <b>Invoice Email:</b> {quoteRequestInfo.invoiceEmail}<br>
+                        <b>Bill To Address:</b> {quoteRequestInfo.billTo}
+                    </p>
+                </div>
+            </div>
+            <br>
+            <div class="table-container" style="margin-bottom: 20px;">
+                <table style="width: 100%;
+                    border-collapse: collapse; border: 1px solid #ddd;">
+                    <thead>
+                        <tr>
+                            <th style="border: 1px solid #ddd; padding: 10px;
+                                text-align: left;background-color: #f4f4f4;">
+                                Sequence Name
+                            </th>
+                            <th style="border: 1px solid #ddd; padding: 10px;
+                                text-align: left;background-color: #f4f4f4;">
+                                Product
+                            </th>
+                            <th style="border: 1px solid #ddd; padding: 10px;
+                                text-align: left;background-color: #f4f4f4;">
+                                Vector
+                            </th>
+                            <th style="border: 1px solid #ddd; padding: 10px;
+                                text-align: right;background-color: #f4f4f4;">
+                                Sequence Length
+                            </th>
+                            <th style="border: 1px solid #ddd;padding: 10px;
+                                text-align: left;background-color: #f4f4f4;">Quantity</th>
+                            <th style="border: 1px solid #ddd;padding: 10px;
+                                text-align: left;background-color: #f4f4f4;">End Customer Price (USD)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={requestQuotes} for:item="item">
+                            <tr key={item.Id}>
+                                <td style="border: 1px solid #ddd;padding: 10px;
+                                    text-align: left;">{item.ABT_Sequence_Name__c}</td>
+                                <td style="border: 1px solid #ddd;padding: 10px;
+                                    text-align: left;">{item.ABT_Product_Name__c}</td>
+                                <td style="border: 1px solid #ddd;padding: 10px;
+                                    text-align: left;">{item.vectorName}</td>
+                                <td style="border: 1px solid #ddd;padding: 10px;
+                                    text-align: right;">{item.ABT_Sequence_Length__c}</td>
+                                <td style="border: 1px solid #ddd;padding: 10px;
+                                    text-align: left;">{item.ABT_Quantity__c}</td>
+                                <td style="border: 1px solid #ddd;padding: 10px;
+                                    text-align: left;">${item.formatedEndCustomerPrice}</td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-container" style="margin-bottom: 20px;">
+                <table class="totals" style="width: 100%;
+                    border-collapse: collapse; border: 1px solid #ddd;">
+                    <tr>
+                        <td style="border: 1px solid #ddd;padding: 10px;
+                            text-align: left;">Subtotal</td>
+                        <td style="border: 1px solid #ddd;padding: 10px;
+                            text-align: left;">${quoteRequestInfo.endCustomerSubtotal}</td>
+                    </tr>
+                    <template if:true={quoteRequestInfo.formattedDiscount}>
+                        <tr>
+                            <td style="border: 1px solid #ddd;padding: 10px;
+                                text-align: left;">Discount</td>
+                            <td style="border: 1px solid #ddd;padding: 10px;
+                                text-align: left;">{quoteRequestInfo.formattedDiscount}</td>
+                        </tr>
+                    </template>
+                    <tr>
+                        <td style="border: 1px solid #ddd;padding: 10px;
+                            text-align: left;">Shipping Amount</td>
+                        <td style="border: 1px solid #ddd;padding: 10px;
+                            text-align: left;">${quoteRequestInfo.shippingAmount}</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd;padding: 10px;
+                            text-align: left;">Total Price</td>
+                        <td style="border: 1px solid #ddd;padding: 10px;
+                            text-align: left;">${quoteRequestInfo.endCustomerTotal}</td>
+                    </tr>
+                </table>
+                <br>
+                <b>Delivery Format:</b> {quoteRequestInfo.DeliveryFormat}<br>
+                <b>Yield:</b> {quoteRequestInfo.Yield}<br>
+                <b>Terms & Conditions:</b> Products and services outlined in this quote are bound by Ansa's Terms and
+                Conditions found here:&nbsp;<a href="https://ansabio.com/terms-and-conditions/" target="_blank">https://ansabio.com/terms-and-conditions/</a>.
+                <br><br>
+                <b>Purchase Order Instructions:</b> Please send all purchase orders and purchasing inquiries to&nbsp;<a href="mailto:customerservice@ansabio.com">customerservice@ansabio.com</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vector Selection Modal for Individual Row -->
+    <template if:true={isVectorModalOpen}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <div class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        title="Close" onclick={closeVectorModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="close"
+                            size="small"></lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 class="slds-text-heading_medium">Select Vector</h2>
+                </div>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <template if:true={selectedLineItemsForVector.length}>
+                        <div class="slds-m-bottom_medium">
+                            <h3 class="slds-text-heading_small">Sequence:</h3>
+                            <p>{selectedSequenceName}</p>
+                        </div>
+                    </template>
+
+                    <lightning-combobox name="vectorSelector" label="Select Vector" value={selectedVectorForBulk}
+                        placeholder="Choose a vector..." options={vectorOptions} onchange={handleVectorSelection}
+                        required>
+                    </lightning-combobox>
+
+                    <br>
+                    <lightning-button variant="neutral" label="Cancel" onclick={closeVectorModal}
+                        style="margin-right:20px"></lightning-button>
+                    <lightning-button variant="brand" label="Apply Vector"
+                        onclick={handleApplyVectorToSelected}></lightning-button>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- Bulk Vector Selection Modal -->
+    <template if:true={isBulkVectorModalOpen}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <div class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        title="Close" onclick={closeBulkVectorModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="close"
+                            size="small"></lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 class="slds-text-heading_medium">Bulk Vector Selection</h2>
+                </div>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <lightning-combobox name="bulkVectorSelector" label="Select Vector to Apply"
+                        value={selectedVectorForBulk} placeholder="Choose a vector..." options={vectorOptions}
+                        onchange={handleVectorSelection} required>
+                    </lightning-combobox>
+
+                    <br>
+                    <lightning-button variant="neutral" label="Cancel" onclick={closeBulkVectorModal}
+                        style="margin-right:20px"></lightning-button>
+                    <lightning-button variant="brand" label="Apply to All Selected"
+                        onclick={handleApplyVectorToSelected}></lightning-button>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- Mini-Game Modal -->
+    <template if:true={isGameModalOpen}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container game-modal-container">
+                <div class="slds-modal__header game-modal-header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        title="Close" onclick={closeGameModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="close"
+                            size="small"></lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 class="slds-text-heading_small">
+                        <lightning-icon icon-name="utility:game" size="x-small"
+                            class="slds-m-right_x-small"></lightning-icon>
+                        Play While You Wait
+                    </h2>
+                </div>
+                <div class="slds-modal__content game-modal-content">
+                    <!-- Status Indicator -->
+                    <div class="game-status-indicator slds-m-bottom_small">
+                        <div class="slds-text-body_small slds-m-bottom_x-small">
+                            <lightning-icon icon-name={calculationStatusIcon} size="xx-small"
+                                class="slds-m-right_xx-small"></lightning-icon>
+                            {calculationStatusMessage}
+                        </div>
+
+                        <!-- Progress Bar -->
+                        <div class="game-progress-bar">
+                            <div class="game-progress-fill" style={progressBarStyle}></div>
+                        </div>
+                        <div class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small">
+                            Progress: {progressPercentage}%
+                        </div>
+                    </div>
+
+                    <!-- Game Content Area -->
+                    <div class="game-content-area">
+                        <template if:true={gameResourceUrl}>
+                            <!-- The game HTML will be loaded from static resource -->
+                            <iframe title="Mini Game" class="game-iframe" src={gameResourceUrl}>
+                            </iframe>
+                        </template>
+                        <template if:false={gameResourceUrl}>
+                            <!-- Placeholder when no game is loaded -->
+                            <div class="slds-align_absolute-center slds-p-around_xx-large">
+                                <div class="slds-text-align_center">
+                                    <lightning-icon icon-name="utility:games" size="large"
+                                        class="slds-m-bottom_medium"></lightning-icon>
+                                    <p class="slds-text-body_regular">
+                                        Game content will be loaded here soon!
+                                    </p>
+                                    <p class="slds-text-body_small slds-text-color_weak slds-m-top_small">
+                                        Your complexity calculation is in progress.
+                                    </p>
+                                    <p class="slds-text-body_small slds-text-color_weak slds-m-top_small">
+                                        <em>Note: Upload game HTML as a static resource named "ABT_MiniGame"</em>
+                                    </p>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- Genbank Download Modal -->
+    <template if:true={isGenbankModalOpen}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        title="Close" onclick={handleCloseGenbankModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="close"
+                            size="small"></lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 class="slds-text-heading_medium slds-hyphenate">Download Genbank Files</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <p class="slds-m-bottom_medium">
+                        Your Genbank sequence files are ready for download. Click the button below to download the
+                        files.
+                    </p>
+                    <div class="slds-text-align_center">
+                        <button type="button" class="slds-button slds-button_brand abt-dl-action-btn"
+                            onclick={handleDownloadGenbank}>
+                            <c-abt-download-icon size="sm" alternative-text="Download"></c-abt-download-icon>
+                            Download Now
+                        </button>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button variant="neutral" label="Close" onclick={handleCloseGenbankModal}>
+                    </lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

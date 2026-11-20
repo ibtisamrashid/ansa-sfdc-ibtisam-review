@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <types>
+        <members>Ansa_Reporting</members>
+        <name>CustomApplication</name>
+    </types>
+    <types><members>ABT_DailyInvoiceReport</members><members
+    >ABT_DailyInvoiceReportTest</members><name>ApexClass</name></types>
+    <types><members>ABT_View_Daily_Invoice_Report</members><name
+    >CustomPermission</name></types>
+    <types><members>ABT_Daily_Invoice_Report</members><name
+    >CustomTab</name></types>
+    <types><members>abtDailyInvoiceReport</members><name
+    >LightningComponentBundle</name></types>
+    <types><members>ABT_Daily_Invoice_Reporting</members><name
+    >PermissionSet</name></types>
+    <version>67.0</version>
+</Package>

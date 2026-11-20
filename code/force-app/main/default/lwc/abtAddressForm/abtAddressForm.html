@@ -1,0 +1,245 @@
+<template>
+    <div class={containerClass}>
+        <div class="slds-card">
+            <template if:true={showCardHeader}>
+                <div class="slds-card__header slds-grid">
+                    <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                        <div class="slds-media__figure">
+                            <lightning-icon icon-name="standard:address" size="medium"></lightning-icon>
+                        </div>
+                        <div class="slds-media__body">
+                            <h2 class="slds-card__header-title">
+                                <span>{formTitle}</span>
+                            </h2>
+                        </div>
+                    </header>
+                </div>
+            </template>
+
+            <div class="slds-card__body slds-card__body_inner">
+                <template if:true={isLoading}>
+                    <div class="address-form-loading">
+                        <lightning-spinner alternative-text="Loading address" size="small"></lightning-spinner>
+                    </div>
+                </template>
+
+                <template if:true={errorMessage}>
+                    <div class="slds-notify slds-notify_alert slds-alert_error slds-m-bottom_medium" role="alert">
+                        <span class="slds-assistive-text">Error</span>
+                        <h2>{errorMessage}</h2>
+                    </div>
+                </template>
+
+                <template if:false={accountId}>
+                    <p class="address-form-hint">Loading account information…</p>
+                </template>
+
+                <template if:true={accountId}>
+                    <template if:false={isLoading}>
+                        <template if:true={showAddressTypeSelector}>
+                            <div class="address-type-row slds-m-bottom_medium">
+                                <lightning-radio-group
+                                    label="Address Type"
+                                    options={addressTypeOptions}
+                                    value={selectedAddressType}
+                                    onchange={handleAddressTypeChange}
+                                    type="radio"
+                                    variant="label-hidden"
+                                    disabled={isFormDisabled}
+                                ></lightning-radio-group>
+                            </div>
+                        </template>
+
+                        <div class="address-form-grid">
+                            <div class="address-form-row">
+                                <div class="address-form-col address-form-col_half">
+                                    <lightning-input
+                                        label="First Name"
+                                        value={firstName}
+                                        data-field="firstName"
+                                        onchange={handleFieldChange}
+                                        required
+                                        disabled={isFormDisabled}
+                                    ></lightning-input>
+                                </div>
+                                <div class="address-form-col address-form-col_half">
+                                    <lightning-input
+                                        label="Last Name"
+                                        value={lastName}
+                                        data-field="lastName"
+                                        onchange={handleFieldChange}
+                                        required
+                                        disabled={isFormDisabled}
+                                    ></lightning-input>
+                                </div>
+                            </div>
+
+                            <div class="address-form-row">
+                                <div class="address-form-col address-form-col_half">
+                                    <lightning-input
+                                        label="Company Name"
+                                        value={companyName}
+                                        data-field="companyName"
+                                        onchange={handleFieldChange}
+                                        disabled={isFormDisabled}
+                                    ></lightning-input>
+                                </div>
+                                <div class="address-form-col address-form-col_half">
+                                    <lightning-combobox
+                                        label="Country"
+                                        value={countryCode}
+                                        options={countryOptions}
+                                        data-field="countryCode"
+                                        onchange={handleFieldChange}
+                                        required
+                                        disabled={isFormDisabled}
+                                        placeholder="Select country"
+                                    ></lightning-combobox>
+                                </div>
+                            </div>
+
+                            <!-- ===== CHANGED BLOCK: Address 1 now has a suggestions dropdown ===== -->
+                            <div class="address-form-row">
+                                <div class="address-form-col slds-is-relative">
+                                    <lightning-input
+                                        label="Address 1"
+                                        value={street}
+                                        data-field="street"
+                                        onchange={handleStreetInput}
+                                        required
+                                        disabled={isFormDisabled}
+                                    ></lightning-input>
+
+                                    <template if:true={showSuggestions}>
+                                        <ul class="slds-listbox slds-listbox_vertical address-suggestions" role="listbox">
+                                            <template for:each={suggestions} for:item="suggestion" for:index="idx">
+                                                <li key={suggestion.displayLabel} role="presentation" class="slds-listbox__item">
+                                                    <div class="slds-media slds-listbox__option slds-listbox__option_plain"
+                                                         data-index={idx}
+                                                         onclick={handleSuggestionClick}>
+                                                        <span class="slds-truncate">{suggestion.displayLabel}</span>
+                                                    </div>
+                                                </li>
+                                            </template>
+                                        </ul>
+                                    </template>
+                                </div>
+                            </div>
+                            <!-- ===== END CHANGED BLOCK ===== -->
+
+                            <div class="address-form-row">
+                                <div class="address-form-col address-form-col_half">
+                                    <lightning-input
+                                        label="Address 2"
+                                        value={addressLine2}
+                                        data-field="addressLine2"
+                                        onchange={handleFieldChange}
+                                        disabled={isFormDisabled}
+                                    ></lightning-input>
+                                </div>
+                                <div class="address-form-col address-form-col_half">
+                                    <lightning-input
+                                        label="Zip/Postal Code"
+                                        value={postalCode}
+                                        data-field="postalCode"
+                                        onchange={handleFieldChange}
+                                        required
+                                        disabled={isFormDisabled}
+                                    ></lightning-input>
+                                </div>
+                            </div>
+
+                            <div class="address-form-row">
+                                <div class="address-form-col address-form-col_half">
+                                    <lightning-input
+                                        label="City"
+                                        value={city}
+                                        data-field="city"
+                                        onchange={handleFieldChange}
+                                        required
+                                        disabled={isFormDisabled}
+                                    ></lightning-input>
+                                </div>
+                                <div class="address-form-col address-form-col_half">
+                                    <lightning-combobox
+                                        label="State/Province"
+                                        value={stateCode}
+                                        options={stateOptions}
+                                        data-field="stateCode"
+                                        onchange={handleFieldChange}
+                                        required
+                                        disabled={isFormDisabled}
+                                        placeholder="Select state/province"
+                                    ></lightning-combobox>
+                                </div>
+                            </div>
+
+                            <div class="address-form-row">
+                                <div class="address-form-col">
+                                    <div class="phone-field">
+                                        <span class="phone-field-label">Phone Number</span>
+                                        <div class="phone-field-row">
+                                            <lightning-combobox
+                                                label="Country code"
+                                                value={phoneCountryCode}
+                                                options={phoneCountryCodeOptions}
+                                                data-field="phoneCountryCode"
+                                                onchange={handleFieldChange}
+                                                variant="label-hidden"
+                                                disabled={isFormDisabled}
+                                                class="phone-code-combobox"
+                                            ></lightning-combobox>
+                                            <lightning-input
+                                                label="Phone number"
+                                                type="tel"
+                                                value={phoneNumber}
+                                                data-field="phoneNumber"
+                                                onchange={handleFieldChange}
+                                                variant="label-hidden"
+                                                required
+                                                disabled={isFormDisabled}
+                                                class="phone-number-input"
+                                            ></lightning-input>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="address-form-row">
+                                <div class="address-form-col">
+                                    <lightning-input
+                                        type="checkbox"
+                                        label="Make this my default address"
+                                        checked={isDefault}
+                                        onchange={handleDefaultChange}
+                                        disabled={isFormDisabled}
+                                    ></lightning-input>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </template>
+            </div>
+
+            <div class="slds-card__footer">
+                <div class="slds-grid slds-grid_align-end">
+                    <div class="slds-col slds-no-flex">
+                        <lightning-button
+                            variant="neutral"
+                            label="Cancel"
+                            onclick={handleCancel}
+                            disabled={isSaving}
+                            class="slds-m-right_x-small"
+                        ></lightning-button>
+                        <lightning-button
+                            variant="brand"
+                            label={saveButtonLabel}
+                            onclick={handleSave}
+                            disabled={isFormDisabled}
+                        ></lightning-button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

@@ -1,0 +1,72 @@
+<template>
+  <p class="summary">{summary}</p>
+  <lightning-combobox
+    label="Map view"
+    value={view}
+    options={viewOptions}
+    onchange={handleView}
+  ></lightning-combobox>
+  <template if:true={isCircular}>
+    <svg
+      class="circular-map"
+      viewBox="0 0 400 400"
+      role="img"
+      aria-label="Circular sequence annotation map"
+    >
+      <circle
+        cx="200"
+        cy="200"
+        r="105"
+        fill="none"
+        stroke="#c6d4d9"
+        stroke-width="3"
+      ></circle>
+      <text x="200" y="195" text-anchor="middle">Sequence</text>
+      <text x="200" y="218" text-anchor="middle">{length} bp</text>
+      <template for:each={mapFeatures} for:item="feature">
+        <path
+          key={feature.key}
+          d={feature.path}
+          class={feature.className}
+          fill="none"
+          stroke-width="6"
+        >
+          <title>{feature.description}</title>
+        </path>
+      </template>
+    </svg>
+  </template>
+  <template if:false={isCircular}>
+    <div class="ruler"><span>1</span><span>{length} bp</span></div>
+    <div
+      class="linear-map"
+      style={mapStyle}
+      role="img"
+      aria-label="Linear sequence annotation map"
+    >
+      <template for:each={mapFeatures} for:item="feature">
+        <div
+          key={feature.key}
+          style={feature.style}
+          class={feature.className}
+          title={feature.description}
+        >
+          {feature.label}
+        </div>
+      </template>
+    </div>
+  </template>
+  <template if:false={hasFeatures}
+    ><p>
+      No annotation features yet. Add manual annotations or run Plannotate.
+    </p></template
+  >
+  <template if:true={hasFeatures}>
+    <ul class="feature-list">
+      <template for:each={mapFeatures} for:item="feature"
+        ><li key={feature.key}>{feature.description}</li></template
+      >
+    </ul>
+  </template>
+  <pre class="bases">{sequenceLines}</pre>
+</template>

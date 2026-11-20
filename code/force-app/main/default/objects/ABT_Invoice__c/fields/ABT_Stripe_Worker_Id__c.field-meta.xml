@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>ABT_Stripe_Worker_Id__c</fullName>
+    <description>Committed Queueable ownership before Stripe calls. Retained after failure so uncertain requests cannot be replayed automatically. Clear only after reconciliation.</description>
+    <label>Stripe Worker ID</label>
+    <length>18</length>
+    <required>false</required>
+    <type>Text</type>
+</CustomField>

@@ -1,0 +1,349 @@
+# List files or directories below to ignore them when running force:source:push, force:source:pull, and force:source:status
+# More information: https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_exclude_source.htm
+
+# --- SFDX defaults ---
+package.xml
+
+# LWC configuration files
+**/jsconfig.json
+**/.eslintrc.json
+
+# LWC Jest
+**/__tests__/**
+
+node_modules/
+
+# --- Ansa: local-only files ---
+
+# Manifest backup files (kept locally, never deployed)
+manifest/*.bak
+
+# =====================================================================
+# Ansa: environment-specific metadata
+# ---------------------------------------------------------------------
+# These carry OAuth consumer secrets, callback URLs, endpoints and
+# certificates that are unique to each org. Copying production's values
+# into a sandbox (or a sandbox's into production) breaks the integration
+# that depends on them - Stripe, PandaDoc, Box, CPQ.
+#
+# Salesforce also refuses to export most of them: the September 2026
+# production retrieve failed on CPQIntegrationUserApp, PandaDoc_OAuth2,
+# Stripe_Global_Connector and BoxFedSearch, leaving package.xml listing
+# 7 connected apps against 4 files on disk. Deploys driven by that
+# manifest fail on the missing source.
+#
+# These stay configured per-org, by hand, and out of the pipeline.
+# =====================================================================
+
+force-app/main/default/connectedApps/
+force-app/main/default/authproviders/
+force-app/main/default/certs/
+# Keep the existing AWS credentials org-specific, but allow the Codon
+# Optimizer credential metadata to be deployed to its sandbox.
+force-app/main/default/namedCredentials/AWS_S3_Reader.namedCredential-meta.xml
+force-app/main/default/externalCredentials/AWS_S3_Reader.externalCredential-meta.xml
+
+# =====================================================================
+# Ansa: cannot be retrieved via the Metadata API
+# ---------------------------------------------------------------------
+# Platform limitations confirmed against production, September 2026.
+# =====================================================================
+
+# "A SiteDotCom site using template [Commerce Store (LWR)] does not
+#  support MD API Retrieval."
+force-app/main/default/siteDotComSites/Ansa21.site-meta.xml
+force-app/main/default/siteDotComSites/Ansa_Biotechnologies1.site-meta.xml
+
+# Data Cloud generated objects - retrieval returns
+# "invalid ID field: ConsumptionResourceTags_std__dll"
+force-app/main/default/objectSourceTargetMaps/
+force-app/main/default/dataStreamDefinitions/
+
+# =====================================================================
+# Ansa: cannot be deployed until fixed in the org
+# ---------------------------------------------------------------------
+# The customer portal site (Ansa_Biotechnologies1). Since Salesforce's
+# 10 Oct 2026 release tasks, any deploy touching it is rejected with
+# "The current site template requires a route of type
+#  order-template-detail, but none was found" (build #422), and the site
+# in production has no such route. The files in git match production's
+# content, so nothing is lost by not deploying them.
+#
+# To lift this: open the site in Experience Builder in production, let it
+# add the Order Template Detail page, publish, retrieve the bundle into
+# git, then delete these lines.
+# =====================================================================
+force-app/main/default/digitalExperiences/site/Ansa_Biotechnologies1/
+
+# =====================================================================
+# Ansa: metadata that production can hold but the sandboxes cannot
+# ---------------------------------------------------------------------
+# Production carries licences the sandboxes do not - Agentforce,
+# Einstein Conversation Insights, Pardot, Industries, Enablement. The
+# metadata below either names those features directly or references
+# components that only exist where the licence does, so deploying it
+# from production into a sandbox fails.
+#
+# Every entry here corresponds to a real failure in build #22
+# (95 component errors, validating the production baseline against the
+# partial sandbox). This is a permanent structural difference between
+# the orgs, not drift that can be reconciled away.
+# =====================================================================
+
+# Profiles - 46 of the 95 failures. Every one references
+# standard__LightningInstrumentation, or a user permission
+# (SendExternalEmailAvailable, ManageConsumptionTags) that exists only
+# under a licence production has and partial does not.
+#
+# NOTE FOR MARK / ADAM: excluding profiles is standard practice for
+# Salesforce CI/CD - they are large, org-specific and conflict-prone,
+# and permissions are better managed through permission sets, which
+# stay deployable. But the DevOps plan specifically flags guest user
+# profiles as a common deploy-failure cause, so this needs a decision
+# rather than a default. Profiles currently block every deploy.
+force-app/main/default/profiles/
+
+# Org preferences tied to licensed features. Deliberately file-by-file
+# rather than the whole folder: Apex.settings-meta.xml carries the
+# parallel-test setting that fixes the Apex suite and MUST still deploy.
+force-app/main/default/settings/Analytics.settings-meta.xml
+force-app/main/default/settings/Case.settings-meta.xml
+force-app/main/default/settings/ConversationalIntelligence.settings-meta.xml
+force-app/main/default/settings/DevHub.settings-meta.xml
+force-app/main/default/settings/DigitalWallet.settings-meta.xml
+force-app/main/default/settings/EAC.settings-meta.xml
+force-app/main/default/settings/EncryptionKey.settings-meta.xml
+force-app/main/default/settings/Industries.settings-meta.xml
+force-app/main/default/settings/LightningExperience.settings-meta.xml
+force-app/main/default/settings/Pardot.settings-meta.xml
+force-app/main/default/settings/Security.settings-meta.xml
+
+# References standard__LightningInstrumentation, as the profiles do.
+force-app/main/default/appMenus/AppSwitcher.appMenu-meta.xml
+
+# Salesforce-managed internal permission set; references the Agentforce
+# object GenAIConversationSummary.
+force-app/main/default/permissionsets/sfdcInternalInt__sfdc_slack.permissionset-meta.xml
+
+# Data Cloud generated objects (39 of them). The platform creates and
+# owns these; retrieving them produces definitions Salesforce then
+# refuses to deploy - "Must specify a non-empty label for the
+# CustomObject". They are not authored by anyone and not deployable.
+force-app/main/default/objects/*__dlm/
+force-app/main/default/objects/*__dll/
+force-app/main/default/objects/ssot__*/
+
+# Einstein Conversation Insights objects. Production has the licence,
+# the sandboxes do not, so these fail with "does not resolve to a valid
+# sObject type".
+force-app/main/default/objects/VideoCallRecordingStructure/
+force-app/main/default/objects/VideoCallTranscript/
+force-app/main/default/objects/VoiceCallRecordingStructure/
+
+# Installed packages are installed, not deployed. Retrieved definitions
+# are incomplete by design - "Required field is missing: activateRSS" -
+# and pushing them has never been how a package reaches an org.
+force-app/main/default/installedPackages/
+
+# Agentforce bots. Salesforce refuses to overwrite an active bot version
+# ("Can't edit an active bot version"), and the sandboxes lack the
+# licence in any case.
+force-app/main/default/bots/
+force-app/main/default/genAiPlannerBundles/
+force-app/main/default/aiAuthoringBundles/
+
+# External client apps: the OAuth settings, policies and global settings
+# are separate components that must be created together in the org, and
+# deploying them piecemeal fails on the parent reference.
+force-app/main/default/externalClientApps/
+force-app/main/default/extlClntAppGlobalOauthSets/
+force-app/main/default/extlClntAppOauthSettings/
+force-app/main/default/extlClntAppOauthPolicies/
+force-app/main/default/extlClntAppPolicies/
+
+# Data Cloud service definitions; the platform owns the field mappings
+# and rejects the retrieved form.
+force-app/main/default/cleanDataServices/
+
+# Salesforce returns an internal error deploying these ("An unexpected
+# error occurred. Please include this ErrorId if you contact support").
+force-app/main/default/policyRuleDefinitions/
+force-app/main/default/policyRuleDefinitionSets/
+
+# References the notification type activity_team_member, which the
+# target org rejects as invalid.
+force-app/main/default/notificationTypeConfig/
+
+# Email services require an Apex class reference that does not survive
+# retrieval - "An Apex Class must be specified when creating an Email
+# Service".
+force-app/main/default/emailservices/
+
+# Embeds runtime_sales_linkedin:companyMatch, a LinkedIn Sales Navigator
+# component the sandboxes are not licensed for.
+force-app/main/default/flexipages/Account_Record_Page.flexipage-meta.xml
+
+# =====================================================================
+# Ansa: grown in place, cannot be redeployed as-is
+# ---------------------------------------------------------------------
+# Salesforce validates metadata far more strictly on deploy than it does
+# in situ. Both of these work correctly in production and are not
+# defects - they simply cannot be recreated from scratch in another org.
+# =====================================================================
+
+# FlowDefinition names active version 7. Production has seven versions
+# of this flow; the sandboxes have fewer, so the pointer has nothing to
+# resolve to there. An org difference, not a broken flow. FlowDefinition
+# is legacy metadata in any case - modern activation lives on the Flow.
+force-app/main/default/flowDefinitions/Quote_Date_Calculation_when_Presented.flowDefinition-meta.xml
+
+# Page layout that has grown past the per-layout limit one field at a
+# time. Salesforce checks the limit on a wholesale deploy but not on an
+# incremental edit, so it works in production and cannot be deployed in
+# one piece. Trimming it is a UI decision for whoever owns the object.
+force-app/main/default/layouts/Vector__c-Vector Layout.layout-meta.xml
+
+# =====================================================================
+# Ansa: open questions for Mark Souther / Adam Tracy
+# ---------------------------------------------------------------------
+# Deliberately NOT excluded pending review. Recorded here so the
+# decision is explicit rather than accidental.
+#
+#   cspTrustedSites/     - 33 entries; URLs may differ per org.
+#   digitalExperiences/  - Experience Cloud page content. Behaves
+#                          inconsistently across orgs per the plan.
+#
+# Two production inconsistencies also surfaced in build #22 and are
+# NOT excluded, because they look like real problems worth fixing at
+# source rather than hiding:
+#
+# Two real findings for Mark, surfaced by the first full validation this
+# org has ever had. Both are excluded below so the build can go green,
+# but they are worth fixing at source rather than leaving excluded:
+#
+#   CustomObjectTranslation Account-en_US carries a label for
+#   Account.Billing_Account__c, a field production does not have. The
+#   field exists in ecommerce, so it was likely built there and never
+#   promoted. Harmless at runtime - nothing renders a label for a field
+#   that isn't there - but it blocks any deploy of that translation
+#   file. Deleting the orphaned entry is the clean fix.
+#
+#   EntitlementProcess "sla policy for cases" has filter logic
+#   referencing an undefined filter: 2. Logic of the form "1 AND 2"
+#   where only filter 1 exists. Latent rather than visibly broken -
+#   that branch presumably never evaluates - but it is a genuine
+#   configuration bug.
+# =====================================================================
+
+# Excluded to unblock the pipeline. Remove these two lines once the
+# underlying configuration is corrected in production.
+force-app/main/default/objectTranslations/Account-en_US/
+force-app/main/default/entitlementProcesses/
+
+# =====================================================================
+# Ansa: production metadata that cannot deploy to a sandbox
+# ---------------------------------------------------------------------
+# Every entry below failed build #191 or #192 when the September 2026
+# production refresh (PR #78) was validated against partial. Each is a
+# structural difference between production and the sandboxes, not drift,
+# so git keeps production's copy and the pipeline skips it.
+# =====================================================================
+
+# Flow version pointers. FlowDefinition names an active version number that
+# only exists in production, so every sandbox rejects it with "Invalid
+# version number". Legacy metadata; activation lives on the Flow itself.
+force-app/main/default/flowDefinitions/ABT_Create_Quote_After_Request_Quote.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/ABT_Create_Quote_Request_LineItem_after_Quote_Line_Item.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/Account_Order_Counter.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/Create_MES_Order_When_Ready.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/IDT_Test_Opps_Delete.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/MuleSoft_Create_NS_Order_Header.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/Opportunity_Before_Insert_Before_Update.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/Opportunity_Default_Price_Book.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/Opportunity_Name.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/Opportunity_New_Run_Rate_Opp.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/Opportunity_Set_Run_Rate_Amount.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/Opportunity_Update_Forecast_on_Quoted_Stage.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/Opportunity_Update_Remaining_Forecast.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/Order_Add_Vector_to_Order_Quote_Line_Items.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/Order_Create_From_Quote.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/Order_Draft_to_Entered.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/Order_Product_Screenflow_AOTG_Lapsing_Next_3_Days.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/Order_Shipment_Email_Notification2.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/Order_Status_Calculation.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/Order_Update_Run_Rate_Opportunity.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/Order_Update_Ship_to_Attn_Company_Invoice_Email.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/Product_SKU_Update.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/Promo_Code_Creation.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/Promo_Code_End_of_Year_2025.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/Quote_Feasibility_Complete_Check.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/Quote_Line_Item_Creation_Update_Pricing_Flow.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/Quote_Line_Item_Glycerol_Stock.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/Quote_Line_Item_Order_Product.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/Quote_Line_Item_Product_Code.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/Quote_Line_Item_Scale_Up_Modification.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/Quote_Line_Item_Sequence_Length_Counter.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/Quote_Request_Default_Fields_on_Creation.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/Quote_eCommerce_Address_Update.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/Retrieve_Customer_Collateral_Link.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/Run_Complexity.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/Sequence_Re_Run_Feasibility_Before_Save.flowDefinition-meta.xml
+force-app/main/default/flowDefinitions/Vector_Active_Email_Notification.flowDefinition-meta.xml
+
+# Object translations naming fields the sandboxes do not have
+# (Do_Not_Ship_Before_Date__c, IDT_Reference_Name__c).
+force-app/main/default/objectTranslations/ABT_Quote_Request_Lineitem__c-en_US/API_Ordered__c.fieldTranslation-meta.xml
+force-app/main/default/objectTranslations/ABT_Quote_Request_Lineitem__c-en_US/Original_Quote_Request_Line_ID__c.fieldTranslation-meta.xml
+force-app/main/default/objectTranslations/ABT_Quote_Request_Lineitem__c-en_US/Third_Party_Ship_Date__c.fieldTranslation-meta.xml
+force-app/main/default/objectTranslations/QuoteLineItem-en_US/Product_SKU_RS__c.fieldTranslation-meta.xml
+force-app/main/default/objectTranslations/QuoteLineItem-en_US/Scale_Up_Animal_Free__c.fieldTranslation-meta.xml
+force-app/main/default/objectTranslations/Vector__c-en_US/QC_Insert_Order_Txt__c.fieldTranslation-meta.xml
+force-app/main/default/objectTranslations/Vector__c-en_US/Sequence__c.fieldTranslation-meta.xml
+force-app/main/default/objectTranslations/Vector__c-en_US/Vector_Synthesis_Order_Text__c.fieldTranslation-meta.xml
+
+# Report types built on Einstein Conversation Insights and Activity Capture,
+# or on fields absent from the sandboxes. Production has the licence.
+force-app/main/default/reportTypes/Contacts_with_EAC_Emails.reportType-meta.xml
+force-app/main/default/reportTypes/Contacts_with_Video_Calls_ECI.reportType-meta.xml
+force-app/main/default/reportTypes/Deals_at_Risk_due_to_Objections.reportType-meta.xml
+force-app/main/default/reportTypes/Opportunities_w_Videos_w_Insights.reportType-meta.xml
+force-app/main/default/reportTypes/Opportunities_with_Unified_Calls_w_Insights.reportType-meta.xml
+force-app/main/default/reportTypes/Opptys_UnifActivities_Insights_Keywords.reportType-meta.xml
+force-app/main/default/reportTypes/Order_Products_with_Quote_Line_Items.reportType-meta.xml
+force-app/main/default/reportTypes/Orders_With_Products_and_Quote_Line_Items.reportType-meta.xml
+
+# Sharing sets the sandbox rejects because its org-wide default already
+# grants the same access.
+force-app/main/default/sharingSets/ABT_Record_Sharing_with_Portal_Shopper_Profile.sharingSet-meta.xml
+force-app/main/default/sharingSets/ABT_Record_Sharing_with_Portal_User.sharingSet-meta.xml
+
+# Dashboards, queues and settings naming users that exist only in production.
+force-app/main/default/dashboards/CommerceDashboards/CommercePaymentsDashboard.dashboard-meta.xml
+force-app/main/default/queues/Customer_Experience.queue-meta.xml
+force-app/main/default/settings/EmailAdministration.settings-meta.xml
+force-app/main/default/settings/Knowledge.settings-meta.xml
+
+# Licensed-feature and platform-limit cases: a LinkedIn Sales Navigator
+# flexipage, a static resource over the 5MB limit, and a layout past the
+# per-layout field limit.
+force-app/main/default/flexipages/Lead_Record_Page.flexipage-meta.xml
+force-app/main/default/layouts/Sequence__c-Sequence Layout.layout-meta.xml
+force-app/main/default/staticresources/SNA_99x2h_sf_default_cdn_Ansa_Biotechnologies_B2B1/maintenance.html
+force-app/main/default/staticresources/SNA_99x2h_sf_default_cdn_Ansa_Biotechnologies_B2B1/toomanyrequests.html
+force-app/main/default/staticresources/SNA_99x2h_sf_default_cdn_Ansa_Biotechnologies_B2B1/webruntime/framework/0f82c69bcf/prod/lwr_error_shim
+force-app/main/default/staticresources/SNA_99x2h_sf_default_cdn_Ansa_Biotechnologies_B2B1/webruntime/framework/203fd77f45/prod/lwr_app_bootstrap_hook
+force-app/main/default/staticresources/SNA_99x2h_sf_default_cdn_Ansa_Biotechnologies_B2B1/webruntime/framework/69353f3b2d/prod/lwr_bootstrap
+force-app/main/default/staticresources/SNA_99x2h_sf_default_cdn_Ansa_Biotechnologies_B2B1/webruntime/framework/6de35fcd10/prod/lwr_app
+force-app/main/default/staticresources/SNA_99x2h_sf_default_cdn_Ansa_Biotechnologies_B2B1/webruntime/framework/77bd9192b6/prod/lwr_bootstrap_locker
+force-app/main/default/staticresources/SNA_99x2h_sf_default_cdn_Ansa_Biotechnologies_B2B1/webruntime/framework/77f8cd7b6e/prod/lwr_mobile
+force-app/main/default/staticresources/SNA_99x2h_sf_default_cdn_Ansa_Biotechnologies_B2B1/webruntime/framework/81f9765ff3/prod/lwr_loader
+force-app/main/default/staticresources/SNA_99x2h_sf_default_cdn_Ansa_Biotechnologies_B2B1/webruntime/framework/9ad6740c6f/prod/lwr_handlebars
+
+# Flow whose deploy fails with a field integrity exception in the sandboxes.
+force-app/main/default/flows/Order_Create_From_Quote.flow-meta.xml
+
+# Flow version pointer that names a version ecommerce does not have
+# ("Invalid version number: 2", build #243). Same case as the entries
+# above: FlowDefinition records which version is active, and each org
+# numbers its versions independently.
+force-app/main/default/flowDefinitions/Order_Product_Create_Below_Spec_Case.flowDefinition-meta.xml

@@ -1,0 +1,231 @@
+<template>
+  <section class="report-shell" aria-label="Ansa Daily Invoicing Report">
+    <header class="report-header">
+      <div>
+        <p class="eyebrow">ANSA · FINANCIAL OPERATIONS</p>
+        <h1>Daily Invoicing Report</h1>
+        <p class="subtitle">
+          A daily view of invoice activity across Salesforce and Stripe.
+        </p>
+      </div>
+      <span class="environment-badge">{environmentBadge}</span>
+    </header>
+    <div class="report-body" aria-busy={loading}>
+      <template lwc:if={contextLoading}>
+        <p role="status" class="filter-help">
+          Checking the reporting environment…
+        </p>
+      </template>
+      <template lwc:if={contextError}>
+        <div class="source-error">
+          <p role="alert">{contextError}</p>
+          <lightning-button
+            label="Retry environment check"
+            onclick={loadContext}
+          ></lightning-button>
+        </div>
+      </template>
+      <section class="filter-panel" aria-label="Report filters">
+        <h2 class="section-title">Reporting period</h2>
+        <div class="filter-grid">
+          <lightning-input
+            type="date"
+            name="startDate"
+            label="From"
+            value={startDate}
+            onchange={handleChange}
+            disabled={runDisabled}
+            required
+          ></lightning-input>
+          <lightning-input
+            type="date"
+            name="endDate"
+            label="Through"
+            value={endDate}
+            onchange={handleChange}
+            disabled={runDisabled}
+            required
+          ></lightning-input>
+          <lightning-input
+            name="currencyCode"
+            label="Currency"
+            value={currencyCode}
+            pattern="[A-Za-z]{3}"
+            maxlength="3"
+            onchange={handleChange}
+            disabled={runDisabled}
+            required
+          ></lightning-input>
+          <div class="filter-action">
+            <lightning-button
+              label="Run report"
+              variant="brand"
+              icon-name="utility:refresh"
+              onclick={handleRun}
+              disabled={runDisabled}
+            ></lightning-button>
+          </div>
+        </div>
+        <p class="filter-help">
+          Choose up to 31 days. Amounts are shown in the selected currency.
+        </p>
+      </section>
+      <template lwc:if={loading}>
+        <lightning-spinner
+          alternative-text="Loading invoices"
+          size="small"
+        ></lightning-spinner>
+      </template>
+      <template for:each={errors} for:item="error">
+        <div key={error.source} role="alert" class="source-error">
+          <strong>{error.source} unavailable</strong>
+          <span>{error.message}</span>
+        </div>
+      </template>
+      <template lwc:if={hasRows}>
+        <div class="source-grid" aria-label="Totals for the reporting period">
+          <template for:each={sourceSummaries} for:item="summary">
+            <section
+              key={summary.source}
+              class="source-card"
+              aria-label={summary.source}
+            >
+              <h2 class="source-name">{summary.source}</h2>
+              <dl class="metric-grid">
+                <div>
+                  <dt>Invoices created</dt>
+                  <dd>
+                    <lightning-formatted-number
+                      value={summary.invoicesCreated}
+                    ></lightning-formatted-number>
+                  </dd>
+                </div>
+                <div>
+                  <dt>Line items</dt>
+                  <dd>
+                    <lightning-formatted-number
+                      value={summary.lineItems}
+                    ></lightning-formatted-number>
+                  </dd>
+                </div>
+                <div>
+                  <dt>Invoice amount</dt>
+                  <dd>
+                    <lightning-formatted-number
+                      value={summary.invoiceAmount}
+                      format-style="currency"
+                      currency-code={summary.currencyCode}
+                    ></lightning-formatted-number>
+                  </dd>
+                </div>
+              </dl>
+            </section>
+          </template>
+        </div>
+        <section class="results-panel" aria-label="Daily comparison">
+          <div class="results-heading">
+            <h2 class="section-title">Daily comparison</h2>
+            <p aria-live="polite" class="result-label">{resultLabel}</p>
+            <p class="filter-help">
+              Select a line-item count to see the items and open their invoices.
+            </p>
+          </div>
+          <div class="table-container">
+            <lightning-datatable
+              key-field="key"
+              data={rows}
+              columns={columns}
+              onrowaction={handleRowAction}
+              hide-checkbox-column
+            ></lightning-datatable>
+          </div>
+        </section>
+        <template lwc:if={detailsOpen}>
+          <section
+            class="results-panel details-panel"
+            aria-label="Line items and invoices"
+            aria-busy={detailsLoading}
+          >
+            <div class="results-heading details-heading">
+              <div>
+                <h2 class="section-title">Line items and invoices</h2>
+                <p class="result-label">{detailTitle}</p>
+                <p class="filter-help">
+                  Each item links to its parent invoice. Invoice links open in a
+                  new tab. {stripeAccessNote} Details reflect the current source
+                  records.
+                </p>
+              </div>
+              <lightning-button-icon
+                icon-name="utility:close"
+                alternative-text="Close line items"
+                title="Close line items"
+                onclick={closeDetails}
+              ></lightning-button-icon>
+            </div>
+            <template lwc:if={detailsLoading}>
+              <lightning-spinner
+                alternative-text="Loading line items"
+                size="small"
+              ></lightning-spinner>
+            </template>
+            <template lwc:if={detailError}>
+              <div class="detail-message">
+                <p role="alert" class="source-error">{detailError}</p>
+                <lightning-button
+                  label="Retry line items"
+                  onclick={loadDetails}
+                ></lightning-button>
+              </div>
+            </template>
+            <template lwc:if={hasDetailRows}>
+              <div class="table-container">
+                <lightning-datatable
+                  key-field="key"
+                  data={detailRows}
+                  columns={detailColumns}
+                  hide-checkbox-column
+                ></lightning-datatable>
+              </div>
+            </template>
+            <template lwc:if={showNoDetailRows}>
+              <p class="detail-message" role="status">
+                No line items were found for this date and currency.
+              </p>
+            </template>
+          </section>
+        </template>
+      </template>
+      <template lwc:if={showEmptyState}>
+        <div class="empty-state">
+          <lightning-icon
+            icon-name="standard:report"
+            alternative-text="Invoice reporting"
+            size="large"
+          ></lightning-icon>
+          <h2>Your daily comparison starts here</h2>
+          <p>
+            Select a reporting period and run the report to view invoice counts,
+            line items and amounts for each system.
+          </p>
+        </div>
+      </template>
+      <details class="report-notes">
+        <summary>About this report</summary>
+        <p>
+          Salesforce uses Invoice Date and records you can access.
+          {stripeDataNote}
+        </p>
+        <p>
+          Amounts use invoice totals. Tax, shipping and product consolidation
+          can cause differences between systems. Source totals are shown
+          separately and should not be added together.
+        </p>
+        <p>
+          NetSuite is not connected. A source error means its figures are
+          unavailable, rather than zero.
+        </p>
+      </details>
+    </div>
+  </section>
+</template>

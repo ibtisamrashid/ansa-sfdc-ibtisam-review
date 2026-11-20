@@ -1,0 +1,1091 @@
+<template>
+    <div class="quote-page">
+        <div class="quote-detail-content">
+
+            <template if:true={isLoading}>
+                <div class="quote-loading">
+                    <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+                </div>
+            </template>
+
+            <template if:false={isLoading}>
+                <div class="quote-detail-loaded">
+                    <div class="quote-header">
+                        <div class="quote-title-row">
+                            <h2 class="quote-title">{pageTitle}</h2>
+                            <template if:true={showStatusBadge}>
+                                <span class={statusBadgeClass}>{statusLabel}</span>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Tabs row + packaging/actions; instruction sits below the tab divider -->
+                    <div class="quote-detail-header-band">
+                        <div class="quote-detail-tabs-row">
+                            <div class="quote-detail-tabs" role="tablist">
+                                <button type="button" class={sequencesTabClass} role="tab"
+                                    aria-selected={isSequencesTab} onclick={handleSequencesTab}>Sequences</button>
+                                <button type="button" class={deliveryTabClass} role="tab" aria-selected={isDeliveryTab}
+                                    onclick={handleDeliveryTab}>Delivery Details</button>
+                            </div>
+                            <div class={headerBulkSlotClass}>
+                                <template if:true={isSequencesTab}>
+                                    <template if:true={showBulkSequenceActions}>
+                                        <div class="step3-bulk-controls step3-bulk-controls--header">
+                                            <div class="step3-bulk-field step3-bulk-field--toxic">
+                                                <span class="step3-bulk-label">Toxic?</span>
+                                                <div class="step3-bulk-control-row">
+                                                    <input type="checkbox" class="step3-bulk-checkbox"
+                                                        checked={bulkToxicChecked} disabled={isBulkToxicDisabled}
+                                                        onchange={handleBulkToxicChange} />
+                                                </div>
+                                            </div>
+                                            <template if:true={showBulkReflexSelection}>
+                                                <div class="step3-bulk-field step3-bulk-field--reflex">
+                                                    <span class="step3-bulk-label">Reflex?</span>
+                                                    <div class="step3-bulk-control-row">
+                                                        <input type="checkbox" class="step3-bulk-checkbox"
+                                                            checked={bulkReflexChecked} disabled={isBulkReflexDisabled}
+                                                            onchange={handleBulkReflexChange} />
+                                                    </div>
+                                                </div>
+                                            </template>
+                                            <template if:true={showVectorBulkSelection}>
+                                                <div class="step3-bulk-field step3-bulk-field--vector">
+                                                    <span class="step3-bulk-label">Vector</span>
+                                                    <div class="step3-vector-cell step3-bulk-vector-cell"
+                                                        onclick={stopProp}>
+                                                        <c-abt-custom-select
+                                                            class="step3-inline-select step3-vector-select step3-bulk-vector-select"
+                                                            size="sm" name="bulk-vector" placeholder="Default vector"
+                                                            options={vectorOptions} value={bulkVectorValue}
+                                                            disabled={isBulkVectorDisabled}
+                                                            onchange={handleBulkVectorChange}></c-abt-custom-select>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+                                    <template if:true={showAddSequenceButton}>
+                                        <button type="button" class="footer-btn-next step3-add-sequence-btn"
+                                            onclick={handleAddSequence}>+ Add Sequence</button>
+                                    </template>
+                                </template>
+                                <template if:true={isDeliveryTab}>
+                                    <template if:true={showGlycerolBulkActions}>
+                                        <div class="step3-bulk-field step3-bulk-field--glycerol">
+                                            <span class="step3-bulk-label">Glycerol Stock?</span>
+                                            <div class="step3-bulk-control-row">
+                                                <input type="checkbox" class="step3-bulk-checkbox"
+                                                    checked={bulkGlycerolChecked} disabled={isGlycerolBulkDisabled}
+                                                    onchange={handleBulkGlycerolChange} />
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <template if:false={showGlycerolBulkActions}>
+                                        <span class="step4-packaging-label">PACKAGING TYPE</span>
+                                        <div class="step4-packaging-select-wrap">
+                                            <c-abt-custom-select class="step4-packaging-select" name="packaging"
+                                                size="md" fit-content placeholder={packagingPlaceholder}
+                                                options={packagingOptions} value={packagingType} disabled={isReadOnly}
+                                                onchange={handlePackagingChange}></c-abt-custom-select>
+                                        </div>
+                                    </template>
+                                </template>
+                            </div>
+                        </div>
+                        <div class="quote-detail-below-tabs">
+                            <p class="step3-subtitle quote-detail-instruction">{instructionText}</p>
+                            <template if:true={showCalculationStatus}>
+                                <div class="quote-calculation-status" role="status">
+                                    <template if:true={isCalculationPending}>
+                                        <span class="quote-calculation-status-pending">
+                                            <template if:true={showFeasibilityGameLink}>
+                                                <a href="javascript:void(0);"
+                                                    class="game-trigger-link game-trigger-link-bold"
+                                                    onclick={handleGameLinkClick}
+                                                    title="Play Helix Rush while you wait">
+                                                    How about a game while you wait?
+                                                </a>
+                                                <span class="game-trigger-separator" aria-hidden="true">|</span>
+                                            </template>
+                                            {calculationPendingLabel}
+                                            <span class="dot-loading" aria-hidden="true">
+                                                <span class="dot dot1"></span>
+                                                <span class="dot dot2"></span>
+                                                <span class="dot dot3"></span>
+                                            </span>
+                                        </span>
+                                    </template>
+                                    <template if:true={showClassificationComplete}>
+                                        <span class="quote-calculation-status-complete">
+                                            <lightning-icon icon-name="utility:check" size="x-small"
+                                                alternative-text="Complete"
+                                                class="quote-calculation-check"></lightning-icon>
+                                            Sequence Classification &amp; Pricing Complete
+                                        </span>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- ─── SEQUENCES TAB ─────────────────────────────────────────────── -->
+                    <template if:true={isSequencesTab}>
+                        <div class="quote-body step3-body">
+                            <template if:true={hasSequenceErrors}>
+                                <div class="sequence-error-banner">
+                                    <lightning-icon icon-name="utility:error" size="x-small" alternative-text="Error"
+                                        variant="inverse"></lightning-icon>
+                                    <span class="error-banner-text">
+                                        <b>Error:</b> {sequenceErrorBannerMessage}
+                                    </span>
+                                </div>
+                            </template>
+                            <template if:true={hasDuplicateSequenceNames}>
+                                <div class="sequence-error-banner">
+                                    <lightning-icon icon-name="utility:error" size="x-small" alternative-text="Error"
+                                        variant="inverse"></lightning-icon>
+                                    <span class="error-banner-text">
+                                        <b>Error:</b> {duplicateSequenceNameBannerMessage}
+                                    </span>
+                                </div>
+                            </template>
+                            <template if:true={hasSequenceNameErrors}>
+                                <div class="sequence-error-banner">
+                                    <lightning-icon icon-name="utility:error" size="x-small" alternative-text="Error"
+                                        variant="inverse"></lightning-icon>
+                                    <span class="error-banner-text">
+                                        <b>Error:</b> {sequenceNameErrorBannerMessage}
+                                    </span>
+                                </div>
+                            </template>
+                            <template if:true={hasVectorErrors}>
+                                <div class="sequence-error-banner">
+                                    <lightning-icon icon-name="utility:error" size="x-small" alternative-text="Error"
+                                        variant="inverse"></lightning-icon>
+                                    <span class="error-banner-text">
+                                        <b>Error:</b> {sequenceVectorErrorBannerMessage}
+                                    </span>
+                                </div>
+                            </template>
+
+                            <div class={step3TableWrapClass}>
+                                <table class={step3TableClass}>
+                                    <thead>
+                                        <tr>
+                                            <th class="step3-th step3-th-check">
+                                                <input type="checkbox" checked={allSequencesSelected} onclick={stopProp}
+                                                    onchange={handleSelectAll} disabled={isReadOnly} />
+                                            </th>
+                                            <th class="step3-th step3-th-name">Name</th>
+                                            <th class="step3-th step3-th-seq">Sequence</th>
+                                            <th class="step3-th step3-th-num">Length (bp)</th>
+                                            <template if:true={showVectorSelection}>
+                                                <th class="step3-th step3-th-vector step3-th-tooltip">
+                                                    <span class="step3-th-vector-header">
+                                                        <span class="step3-th-vector-label">Vector</span>
+                                                        <template if:true={hasAnyReflexApplicableVector}>
+                                                            <span
+                                                                class="quote-th-tooltip-wrap step3-reflex-header-tooltip"
+                                                                tabindex="0">
+                                                                <span class="quote-th-reflex-warning-badge">
+                                                                    <lightning-icon icon-name="utility:warning"
+                                                                        size="x-small"
+                                                                        alternative-text="Reflex w/ pStable"
+                                                                        class="quote-th-tooltip-warning-icon quote-th-tooltip-warning-icon--header"></lightning-icon>
+                                                                </span>
+                                                                <span
+                                                                    class="quote-th-tooltip-popover quote-th-tooltip-popover--wide step3-reflex-tooltip-popover"
+                                                                    role="tooltip">
+                                                                    <span class="quote-th-tooltip-arrow"
+                                                                        aria-hidden="true"></span>
+                                                                    <span class="quote-th-tooltip-body">
+                                                                        <p>Sequences that cannot be stably propagated in
+                                                                            pANSA or pUC vectors can often be
+                                                                            successfully
+                                                                            propagated using our inducible-copy
+                                                                            pStable-Ind
+                                                                            vector.</p>
+                                                                        <p>Like pANSA and pUC, pStable-Ind is a cloning
+                                                                            vector that is compatible with Golden Gate
+                                                                            Assembly and many other applications.
+                                                                            However, the pStable-Ind backbone is ~10.5
+                                                                            kb, so please keep that in mind in case your
+                                                                            application requires a compact plasmid.</p>
+                                                                        <p>If you would like us to reflex into our
+                                                                            inducible-copy pStable-Ind vector if our
+                                                                            attempts in pANSA and pUC fail, please click
+                                                                            on the plasmid map icon and check the Reflex
+                                                                            Vector Opt-In checkbox.</p>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                        </template>
+                                                    </span>
+                                                </th>
+                                            </template>
+                                            <th class="step3-th step3-th-feasibility step3-th-tooltip">
+                                                <span class="quote-th-tooltip-wrap" tabindex="0">
+                                                    <span class="quote-th-tooltip-label">Feasibility</span>
+                                                    <span class="quote-th-tooltip-popover" role="tooltip">
+                                                        <span class="quote-th-tooltip-arrow" aria-hidden="true"></span>
+                                                        <span class="quote-th-tooltip-body">
+                                                            <p><strong>Guaranteed:</strong> We are confident we can
+                                                                synthesize your
+                                                                sequence and are guaranteed to ship by the communicated
+                                                                date or its
+                                                                free.</p>
+                                                            <p><strong>Accepted:</strong> We are confident we can
+                                                                synthesize your sequence. These sequences are not
+                                                                covered by the Ansa On-Time Guarantee.</p>
+                                                            <p><strong>Let's try:</strong> Your sequence is slightly
+                                                                outside our
+                                                                standard product range or may be on the cutting edge of
+                                                                what can be
+                                                                synthesized, but we want to give it a try!</p>
+                                                            <p><strong>Not currently possible:</strong> Your sequence is
+                                                                outside
+                                                                Ansa's current capabilities and cannot be accepted at
+                                                                this time.</p>
+                                                        </span>
+                                                    </span>
+                                                </span>
+                                            </th>
+                                            <th class="step3-th step3-th-toxic step3-th-tooltip">
+                                                <c-abt-table-header-tooltip label="Potentially Toxic">
+                                                    <p>Potentially toxic sequences can be difficult to manufacture. To
+                                                        improve success rates, we strongly recommend enabling reflex
+                                                        with the pStable vector when applicable. If visible, click the
+                                                        vector map icon and check the box to enable the pStable reflex
+                                                        option.</p>
+                                                </c-abt-table-header-tooltip>
+                                            </th>
+                                            <th class="step3-th step3-th-icon"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template for:each={sequencesWithDisplay} for:item="seq">
+                                                <tr key={seq.id} class={seq.rowClass} data-id={seq.id}
+                                                    onclick={handleRowClick}>
+                                                    <td class="step3-td step3-td-check" onclick={stopProp}>
+                                                        <input type="checkbox" data-id={seq.id} checked={seq.selected}
+                                                            onchange={handleCheckboxClick} disabled={isReadOnly} />
+                                                    </td>
+                                                    <td class="step3-td step3-td-name">
+                                                        <div class="step3-name-cell">
+                                                            <template if:true={seq.hasInvalidChars}>
+                                                                <lightning-icon icon-name="utility:warning"
+                                                                    size="x-small" alternative-text="Warning"
+                                                                    class="sequence-warning-icon"></lightning-icon>
+                                                            </template>
+                                                            <template if:true={seq.hasDuplicateName}>
+                                                                <lightning-icon icon-name="utility:warning"
+                                                                    size="x-small" alternative-text="Warning"
+                                                                    class="sequence-warning-icon"></lightning-icon>
+                                                            </template>
+                                                            <template if:true={seq.hasInvalidName}>
+                                                                <lightning-icon icon-name="utility:warning"
+                                                                    size="x-small" alternative-text="Warning"
+                                                                    class="sequence-warning-icon"></lightning-icon>
+                                                            </template>
+                                                            <span class="step3-name-text"
+                                                                title={seq.nameTooltip}>{seq.name}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td class="step3-td step3-td-seq">{seq.sequenceTruncated}</td>
+                                                    <td class="step3-td step3-td-num">{seq.length}</td>
+                                                    <template if:true={showVectorSelection}>
+                                                        <td class={seq.vectorCellClass} onclick={stopProp}>
+                                                            <div class="step3-vector-cell">
+                                                                <template if:true={seq.hasMissingVector}>
+                                                                    <lightning-icon icon-name="utility:warning"
+                                                                        size="x-small" alternative-text="Warning"
+                                                                        class="sequence-warning-icon"></lightning-icon>
+                                                                </template>
+                                                                <c-abt-custom-select
+                                                                    class="step3-inline-select step3-vector-select"
+                                                                    size="sm" name="vector" placeholder="Default vector"
+                                                                    options={vectorOptions} value={seq.vector}
+                                                                    data-id={seq.id} disabled={isReadOnly}
+                                                                    onchange={handleRowVectorChange}></c-abt-custom-select>
+                                                                <c-abt-reflex-vector-opt-in data-id={seq.id}
+                                                                    show-icon={seq.showReflexOptIn}
+                                                                    opted-in={seq.reflexVectorOptIn}
+                                                                    is-open={seq.reflexPopoverOpen}
+                                                                    disabled={isReadOnly} ontoggle={handleReflexToggle}
+                                                                    onsave={handleReflexSave}></c-abt-reflex-vector-opt-in>
+                                                            </div>
+                                                        </td>
+                                                    </template>
+                                                    <td class="step3-td step3-td-feasibility">{seq.feasibility}</td>
+                                                    <td class="step3-td step3-td-toxic" onclick={stopProp}>
+                                                        <input type="checkbox" data-id={seq.id}
+                                                            checked={seq.potentiallyToxic} onchange={handleToxicChange}
+                                                            disabled={isReadOnly} />
+                                                    </td>
+                                                    <td class="step3-td step3-td-icon" onclick={handleDeleteSequence}
+                                                        data-id={seq.id}>
+                                                        <template if:true={canEdit}>
+                                                            <template if:true={seq.isDeleting}>
+                                                                <span class="step3-row-loading" role="status"
+                                                                    aria-live="polite" aria-label="Deleting sequence">
+                                                                    <span class="dot-loading" aria-hidden="true">
+                                                                        <span class="dot dot1"></span>
+                                                                        <span class="dot dot2"></span>
+                                                                        <span class="dot dot3"></span>
+                                                                    </span>
+                                                                </span>
+                                                            </template>
+                                                            <template if:false={seq.isDeleting}>
+                                                                <c-abt-delete-icon size="sm" alternative-text="Delete"
+                                                                    class="step3-delete-icon"></c-abt-delete-icon>
+                                                            </template>
+                                                        </template>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        <template if:true={showDraftRows}>
+                                            <template for:each={draftRowsWithDisplay} for:item="draft">
+                                                <tr key={draft.id} class={draft.rowClass} data-id={draft.id}
+                                                    onclick={stopProp}>
+                                                    <td class="step3-td step3-td-check" onclick={stopProp}>
+                                                        <input type="checkbox" disabled />
+                                                    </td>
+                                                    <td class="step3-td step3-td-name" onclick={stopProp}>
+                                                        <div class="step3-name-cell step3-name-cell--draft">
+                                                            <template if:true={draft.hasInvalidName}>
+                                                                <lightning-icon icon-name="utility:warning"
+                                                                    size="x-small" alternative-text="Warning"
+                                                                    class="sequence-warning-icon"></lightning-icon>
+                                                            </template>
+                                                            <input type="text" class={draft.nameInputClass}
+                                                                data-id={draft.id} data-field="name" value={draft.name}
+                                                                maxlength={sequenceNameMaxLength}
+                                                                placeholder="Enter Name"
+                                                                aria-label="Sequence name"
+                                                                disabled={draft.isSaving}
+                                                                oninput={handleDraftNameInput}
+                                                                onblur={handleDraftBlur} onpaste={handleDraftPaste}
+                                                                title={draft.nameTooltip} />
+                                                        </div>
+                                                    </td>
+                                                    <td class="step3-td step3-td-seq" onclick={stopProp}>
+                                                        <div class="step3-draft-seq-cell">
+                                                            <template if:true={draft.hasInvalidChars}>
+                                                                <lightning-icon icon-name="utility:warning"
+                                                                    size="x-small" alternative-text="Warning"
+                                                                    class="sequence-warning-icon"></lightning-icon>
+                                                            </template>
+                                                            <input type="text" class={draft.sequenceInputClass}
+                                                                data-id={draft.id} data-field="sequence"
+                                                                value={draft.sequence}
+                                                                placeholder="Enter Sequence"
+                                                                aria-label="Sequence"
+                                                                disabled={draft.isSaving}
+                                                                oninput={handleDraftSequenceInput}
+                                                                onblur={handleDraftBlur} onpaste={handleDraftPaste}
+                                                                title={draft.sequenceTooltip} />
+                                                        </div>
+                                                    </td>
+                                                    <td class="step3-td step3-td-num">{draft.lengthDisplay}</td>
+                                                    <template if:true={showVectorSelection}>
+                                                        <td class="step3-td step3-td-vector" onclick={stopProp}>
+                                                            <div class="step3-vector-cell">
+                                                                <template if:true={draft.hasMissingVector}>
+                                                                    <lightning-icon icon-name="utility:warning"
+                                                                        size="x-small" alternative-text="Warning"
+                                                                        class="sequence-warning-icon"></lightning-icon>
+                                                                </template>
+                                                                <c-abt-custom-select
+                                                                    class="step3-inline-select step3-vector-select"
+                                                                    size="sm" name="draft-vector"
+                                                                    placeholder="Default vector"
+                                                                    options={vectorOptions} value={draft.vector}
+                                                                    data-id={draft.id} disabled={draft.isSaving}
+                                                                    onchange={handleDraftVectorChange}></c-abt-custom-select>
+                                                                <span class="step3-vector-reflex-slot"
+                                                                    aria-hidden="true"></span>
+                                                            </div>
+                                                        </td>
+                                                    </template>
+                                                    <td class="step3-td step3-td-feasibility"></td>
+                                                    <td class="step3-td step3-td-toxic" onclick={stopProp}>
+                                                        <input type="checkbox" data-id={draft.id}
+                                                            checked={draft.potentiallyToxic}
+                                                            disabled={draft.isSaving}
+                                                            onchange={handleDraftToxicChange} />
+                                                    </td>
+                                                    <td class="step3-td step3-td-icon">
+                                                        <template if:true={draft.isSaving}>
+                                                            <span class="step3-row-loading" role="status"
+                                                                aria-live="polite" aria-label="Saving sequence">
+                                                                <span class="dot-loading" aria-hidden="true">
+                                                                    <span class="dot dot1"></span>
+                                                                    <span class="dot dot2"></span>
+                                                                    <span class="dot dot3"></span>
+                                                                </span>
+                                                            </span>
+                                                        </template>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </template>
+                                        <template if:true={showEmptySequencesMessage}>
+                                            <tr>
+                                                <td colspan={step3Colspan} class="step3-empty">No sequences on this
+                                                    quote yet.</td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="quote-detail-footer">
+                                <button type="button" class="quote-download-link" onclick={handleDownloadSequences}>
+                                    <c-abt-download-icon size="md" alternative-text="Download"></c-abt-download-icon>
+                                    DOWNLOAD SEQUENCES
+                                </button>
+                                <div class="quote-detail-footer-totals step4-totals">
+                                    <template if:true={showScaleUpSelection}>
+                                        <span class="step4-total-item">Scale Up Fee: <b>{totalScaleUpFee}</b></span>
+                                    </template>
+                                    <template if:true={showGlycerolSelection}>
+                                        <span class="step4-total-item step4-total-item--glycerol">Glycerol Stock Fee:
+                                            <b>{totalGlycerolFeeDisplay}</b></span>
+                                    </template>
+                                    <span class="step4-grand-total">TOTAL: <b>{grandTotal}</b></span>
+                                </div>
+                            </div>
+                            <template if:true={showFooterActions}>
+                                <div class="quote-detail-footer-action">
+                                    <template if:true={canDeleteQuote}>
+                                        <button type="button" class="quote-delete-btn" onclick={handleDeleteQuoteClick}
+                                            disabled={isDeleteQuoteDisabled}>{deleteQuoteLabel}</button>
+                                    </template>
+                                    <template if:true={showCartAction}>
+                                        <button type="button" class="quote-cart-btn" onclick={handleCartAction}
+                                            disabled={isCartActionDisabled}>
+                                            {cartActionLabelProcessing}
+                                        </button>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- ─── DELIVERY DETAILS TAB ──────────────────────────────────────── -->
+                    <template if:true={isDeliveryTab}>
+                        <div class="quote-body step4-body">
+                            <div class={step4TableWrapClass}>
+                                <table class={step4TableClass}>
+                                    <thead>
+                                        <tr>
+                                            <th class="step3-th step3-th-check">
+                                                <input type="checkbox" checked={allSequencesSelected} onclick={stopProp}
+                                                    onchange={handleSelectAll} disabled={isReadOnly} />
+                                            </th>
+                                            <th class="step3-th step3-th-name">Name</th>
+                                            <th class="step3-th step3-th-date step3-th-tooltip">
+                                                <c-abt-table-header-tooltip label="As Early As Date">
+                                                    <p>Your order could ship as early as this date — actual timing may
+                                                        vary.</p>
+                                                </c-abt-table-header-tooltip>
+                                            </th>
+                                            <th class="step3-th step3-th-date step3-th-tooltip">
+                                                <c-abt-table-header-tooltip label="Guaranteed Date" wide="true">
+                                                    <p><strong>Guaranteed orders:</strong> your committed ship date,
+                                                        backed by Ansa's on-time guarantee promise.</p>
+                                                    <p><strong>Let's Try orders:</strong> your estimated ship date.</p>
+                                                </c-abt-table-header-tooltip>
+                                            </th>
+                                            <th class="step3-th step3-th-group step3-th-tooltip">
+                                                <c-abt-table-header-tooltip label="Tranche">
+                                                    <p>For large orders, Ansa may split your sequences into separate
+                                                        shipment groups called tranches — each with its own estimated
+                                                        ship date so you can receive completed sequences sooner.</p>
+                                                </c-abt-table-header-tooltip>
+                                            </th>
+                                            <th class="step3-th step3-th-complexity step3-th-tooltip">
+                                                <span class="quote-th-tooltip-wrap" tabindex="0">
+                                                    <span class="quote-th-tooltip-label">Complexity</span>
+                                                    <span
+                                                        class="quote-th-tooltip-popover quote-th-tooltip-popover--wide"
+                                                        role="tooltip">
+                                                        <span class="quote-th-tooltip-arrow" aria-hidden="true"></span>
+                                                        <span class="quote-th-tooltip-body">
+                                                            <p>This assessment reflects sequence characteristics that
+                                                                increase
+                                                                synthesis and assembly difficulty.</p>
+                                                            <p><strong>Standard:</strong> Readily manufacturable
+                                                                sequence with low
+                                                                complexity.</p>
+                                                            <p><strong>Complex:</strong> Sequence exhibits moderate to
+                                                                high
+                                                                complexity.</p>
+                                                        </span>
+                                                    </span>
+                                                </span>
+                                            </th>
+                                            <template if:true={showGlycerolSelection}>
+                                                <th class="step3-th step3-th-glycerol step3-th-tooltip">
+                                                    <c-abt-table-header-tooltip label="Glycerol Stock">
+                                                        <p>Includes a glycerol stock shipped on dry ice alongside your
+                                                            dried down sample — ideal for long-term storage.</p>
+                                                    </c-abt-table-header-tooltip>
+                                                </th>
+                                            </template>
+                                            <template if:true={showScaleUpSelection}>
+                                                <th class="step3-th step3-th-scaleup step3-th-tooltip">
+                                                    <c-abt-table-header-tooltip label="Scale Up">
+                                                        <p>Add a scale-up prep to this sequence. Select the checkbox,
+                                                            then use the scale-up icon to configure prep quantity,
+                                                            buffer, and delivery options.</p>
+                                                    </c-abt-table-header-tooltip>
+                                                </th>
+                                            </template>
+                                            <template if:true={showAddlFeesSelection}>
+                                                <th class="step3-th step3-th-addl step3-th-tooltip">
+                                                    <span class="quote-th-tooltip-wrap" tabindex="0">
+                                                        <span class="quote-th-tooltip-label">Add'l Fees</span>
+                                                        <span class="quote-th-tooltip-popover" role="tooltip">
+                                                            <span class="quote-th-tooltip-arrow"
+                                                                aria-hidden="true"></span>
+                                                            <span class="quote-th-tooltip-body">
+                                                                <p>Additional fees reflect optional Scale Up and
+                                                                    Glycerol Stock charges for that sequence. NA
+                                                                    indicates neither is selected for that line.</p>
+                                                            </span>
+                                                        </span>
+                                                    </span>
+                                                </th>
+                                            </template>
+                                            <th class="step3-th step3-th-price step3-th-tooltip">
+                                                <c-abt-table-header-tooltip label="Total Price">
+                                                    <p>The sum of your unit price and any additional fees.</p>
+                                                </c-abt-table-header-tooltip>
+                                            </th>
+                                            <th class="step3-th step3-th-icon"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template if:true={hasSequences}>
+                                            <template for:each={sequencesWithDisplay} for:item="seq">
+                                                <tr key={seq.id} class={seq.rowClass} data-id={seq.id}
+                                                    onclick={handleRowClick}>
+                                                    <td class="step3-td step3-td-check" onclick={stopProp}>
+                                                        <input type="checkbox" data-id={seq.id} checked={seq.selected}
+                                                            onchange={handleCheckboxClick} disabled={isReadOnly} />
+                                                    </td>
+                                                    <td class="step3-td step3-td-name">{seq.name}</td>
+                                                    <td class="step3-td step3-td-date">{seq.asEarlyAsDate}</td>
+                                                    <td class="step3-td step3-td-date">{seq.guaranteedDate}</td>
+                                                    <td class="step3-td step3-td-group">{seq.tranche}</td>
+                                                    <td class="step3-td step3-td-complexity">{seq.complexity}</td>
+                                                    <template if:true={showGlycerolSelection}>
+                                                        <td class="step3-td step3-td-glycerol" onclick={stopProp}>
+                                                            <template if:true={seq.isGlycerolUpdating}>
+                                                                <span class="step3-glycerol-updating"
+                                                                    aria-live="polite">
+                                                                    <span class="dot-loading" aria-hidden="true">
+                                                                        <span class="dot dot1"></span>
+                                                                        <span class="dot dot2"></span>
+                                                                        <span class="dot dot3"></span>
+                                                                    </span>
+                                                                </span>
+                                                            </template>
+                                                            <template if:false={seq.isGlycerolUpdating}>
+                                                                <input type="checkbox" data-id={seq.id}
+                                                                    checked={seq.glycerol}
+                                                                    disabled={seq.glycerolCheckboxDisabled}
+                                                                    onchange={handleGlycerolRowChange} />
+                                                            </template>
+                                                        </td>
+                                                    </template>
+                                                    <template if:true={showScaleUpSelection}>
+                                                        <td class="step3-td step3-td-scaleup" onclick={stopProp}>
+                                                            <div class="step3-scaleup-cell">
+                                                                <template if:true={seq.isScaleUpUpdating}>
+                                                                    <span class="step3-scaleup-updating"
+                                                                        aria-live="polite">
+                                                                        <span class="dot-loading" aria-hidden="true">
+                                                                            <span class="dot dot1"></span>
+                                                                            <span class="dot dot2"></span>
+                                                                            <span class="dot dot3"></span>
+                                                                        </span>
+                                                                    </span>
+                                                                </template>
+                                                                <template if:false={seq.isScaleUpUpdating}>
+                                                                    <input type="checkbox" data-id={seq.id}
+                                                                        checked={seq.scaleUpSelected}
+                                                                        disabled={seq.scaleUpCheckboxDisabled}
+                                                                        onchange={handleScaleUpSelectedChange} />
+                                                                    <c-abt-scale-up-config data-id={seq.id}
+                                                                        show-icon={seq.scaleUpSelected}
+                                                                        configured={seq.scaleUpConfigured}
+                                                                        is-open={seq.scaleUpPopoverOpen}
+                                                                        saving={seq.scaleUpSaving}
+                                                                        disabled={seq.scaleUpCheckboxDisabled}
+                                                                        copy-number={seq.scaleUpCopyNumber}
+                                                                        total-selected-count={seq.totalSelectedCount}
+                                                                        total-line-count={seq.totalLineCount}
+                                                                        quantity-options={scaleUpQuantityOptions}
+                                                                        buffer-options={scaleUpBufferOptions}
+                                                                        normalization-options={scaleUpNormalizationOptions}
+                                                                        default-buffer={_scaleUpBufferDefault}
+                                                                        quantity={seq.scaleUpQuantity}
+                                                                        glycerol-stock={seq.scaleUpGlycerolStock}
+                                                                        endotoxin-free={seq.scaleUpEndotoxinFree}
+                                                                        buffer={seq.scaleUpBuffer}
+                                                                        normalization={seq.scaleUpNormalization}
+                                                                        mass={seq.scaleUpMass}
+                                                                        price={seq.scaleUpPriceDisplay}
+                                                                        lead-time={seq.scaleUpLeadTime}
+                                                                        ontoggle={handleScaleUpToggle}
+                                                                        oncancel={handleScaleUpCancel}
+                                                                        onsave={handleScaleUpSave}
+                                                                        ondefinitionstoggle={handleScaleUpDefinitionsToggle}></c-abt-scale-up-config>
+                                                                </template>
+                                                            </div>
+                                                        </td>
+                                                    </template>
+                                                    <template if:true={showAddlFeesSelection}>
+                                                        <td class="step3-td step3-td-addl">{seq.additionalFees}</td>
+                                                    </template>
+                                                    <td class="step3-td step4-price step3-td-price">{seq.totalPrice}
+                                                    </td>
+                                                    <td class="step3-td step3-td-icon" onclick={handleDeleteSequence}
+                                                        data-id={seq.id}>
+                                                        <template if:true={canEdit}>
+                                                            <template if:true={seq.isDeleting}>
+                                                                <span class="step3-row-loading" role="status"
+                                                                    aria-live="polite" aria-label="Deleting sequence">
+                                                                    <span class="dot-loading" aria-hidden="true">
+                                                                        <span class="dot dot1"></span>
+                                                                        <span class="dot dot2"></span>
+                                                                        <span class="dot dot3"></span>
+                                                                    </span>
+                                                                </span>
+                                                            </template>
+                                                            <template if:false={seq.isDeleting}>
+                                                                <c-abt-delete-icon size="sm" alternative-text="Delete"
+                                                                    class="step3-delete-icon"></c-abt-delete-icon>
+                                                            </template>
+                                                        </template>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </template>
+                                        <template if:false={hasSequences}>
+                                            <tr>
+                                                <td colspan={step4Colspan} class="step3-empty">No sequences to display.
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="quote-detail-footer">
+                                <div class="quote-download-actions">
+                                    <button type="button" class="quote-download-link" onclick={handleDownloadQuotePdf}
+                                        disabled={isPdfDisabled}>
+                                        <c-abt-download-icon size="md"
+                                            alternative-text="Download"></c-abt-download-icon>
+                                        DOWNLOAD QUOTE (PDF)
+                                    </button>
+                                    <template if:true={isIDTChannelPartnership}>
+                                        <button type="button" class="quote-download-link"
+                                            onclick={handleDownloadEndUserQuotePdf} disabled={isPdfDisabled}>
+                                            <c-abt-download-icon size="md"
+                                                alternative-text="Download"></c-abt-download-icon>
+                                            Download End User Quote PDF
+                                        </button>
+                                    </template>
+                                </div>
+                                <div class="quote-detail-footer-totals step4-totals">
+                                    <template if:true={showScaleUpSelection}>
+                                        <span class="step4-total-item">Scale Up Fee: <b>{totalScaleUpFee}</b></span>
+                                    </template>
+                                    <template if:true={showGlycerolSelection}>
+                                        <span class="step4-total-item step4-total-item--glycerol">Glycerol Stock Fee:
+                                            <b>{totalGlycerolFeeDisplay}</b></span>
+                                    </template>
+                                    <span class="step4-grand-total">TOTAL: <b>{grandTotal}</b></span>
+                                </div>
+                            </div>
+                            <template if:true={showFooterActions}>
+                                <div class="quote-detail-footer-action">
+                                    <template if:true={canDeleteQuote}>
+                                        <button type="button" class="quote-delete-btn" onclick={handleDeleteQuoteClick}
+                                            disabled={isDeleteQuoteDisabled}>{deleteQuoteLabel}</button>
+                                    </template>
+                                    <template if:true={showCartAction}>
+                                        <button type="button" class="quote-cart-btn" onclick={handleCartAction}
+                                            disabled={isCartActionDisabled}>
+                                            {cartActionLabelProcessing}
+                                        </button>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <div class="quote-detail-terms">
+                        <p>We aim to give you the best customer experience by ensuring your order is shipped in full and
+                            on time.
+                            All orders that qualify as Ansa standard products will be guaranteed to ship on the date we
+                            promise,
+                            as the complete order — and if we miss that mark, we will deliver all the DNA we are able to
+                            make at
+                            no charge. See our <a href="https://ansabio.com/terms-and-conditions/" target="_blank"
+                                rel="noopener noreferrer" class="quote-detail-terms-link">Terms and Conditions</a>.</p>
+                    </div>
+                </div>
+            </template>
+
+        </div>
+
+    </div>
+
+    <c-abt-scale-up-definitions-modal is-open={_scaleUpDefinitionsOpen}
+        onclose={handleScaleUpDefinitionsClose}></c-abt-scale-up-definitions-modal>
+
+    <!-- Edit Sequence Modal -->
+    <template if:true={showEditModal}>
+        <div class="manual-modal-backdrop" onclick={handleCloseEditModal}>
+            <div class="manual-modal-container" onclick={handleModalContentClick}>
+                <div class="manual-modal-header">
+                    <h2 class="manual-modal-title">{editModalTitle}</h2>
+                    <button class="modal-close-btn" onclick={handleCloseEditModal}>
+                        <lightning-icon icon-name="utility:close" size="small"
+                            alternative-text="Close"></lightning-icon>
+                    </button>
+                </div>
+                <div class="manual-modal-body">
+                    <div class="manual-fields-row">
+                        <div class="manual-field-block">
+                            <label class="manual-field-label">Name <span class="manual-field-required">*</span></label>
+                            <lightning-input type="text" value={editSequenceName} onchange={handleEditNameChange}
+                                variant="label-hidden" class="manual-input-field" required
+                                max-length={sequenceNameMaxLength} read-only={isReadOnly}></lightning-input>
+                            <template if:true={editSequenceNameError}>
+                                <p class="manual-error-text">{editSequenceNameError}</p>
+                            </template>
+                        </div>
+                        <template if:true={showVectorSelection}>
+                            <div class="manual-field-block manual-vector-field">
+                                <label class="manual-field-label">Vector
+                                    <template if:true={isVectorRequired}>
+                                        <span class="manual-field-required">*</span>
+                                    </template>
+                                </label>
+                                <c-abt-custom-select class="manual-input-field step3-inline-select" size="sm"
+                                    name="modal-vector" placeholder="Default vector" options={vectorOptions}
+                                    value={editSequenceVector} onchange={handleEditVectorChange}
+                                    disabled={isReadOnly}></c-abt-custom-select>
+                                <template if:true={editSequenceVectorError}>
+                                    <p class="manual-error-text">{editSequenceVectorError}</p>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                    <div class="manual-sequence-block">
+                        <div class="manual-sequence-header">
+                            <label class="manual-field-label">Sequence <span
+                                    class="manual-field-required">*</span></label>
+                            <span class="manual-char-count">Length: {editSequenceCharCount} bp</span>
+                        </div>
+                        <textarea class={editTextareaClass} placeholder={sequencePlaceholder}
+                            onchange={handleEditSequenceChange} oninput={handleEditSequenceChange} rows="10"
+                            readonly={isReadOnly}>{editSequenceText}</textarea>
+                        <template if:true={editSequenceError}>
+                            <p class="manual-error-text">{editSequenceError}</p>
+                        </template>
+                    </div>
+                </div>
+                <div class="manual-modal-footer">
+                    <button class="manual-cancel-btn" onclick={handleCloseEditModal}>{modalCloseLabel}</button>
+                    <template if:true={showEditModalSave}>
+                        <button type="button" class="manual-save-btn" onclick={handleSaveEdit}
+                            disabled={isSaveDisabled}>Save</button>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- Helix Rush Mini-Game Modal -->
+    <template if:true={isGameModalOpen}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container game-modal-container">
+                <div class="slds-modal__header game-modal-header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        title="Close" onclick={closeGameModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="close"
+                            size="small"></lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 class="slds-text-heading_small">
+                        <lightning-icon icon-name="utility:game" size="x-small"
+                            class="slds-m-right_x-small"></lightning-icon>
+                        Play While You Wait
+                    </h2>
+                </div>
+                <div class="slds-modal__content game-modal-content">
+                    <div class="game-status-indicator slds-m-bottom_small">
+                        <div class="slds-text-body_small slds-m-bottom_x-small">
+                            <lightning-icon icon-name={feasibilityStatusIcon} size="xx-small"
+                                class="slds-m-right_xx-small"></lightning-icon>
+                            {feasibilityStatusMessage}
+                        </div>
+                        <div class="game-progress-bar">
+                            <div class="game-progress-fill" style={progressBarStyle}></div>
+                        </div>
+                        <div class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small">
+                            Progress: {progressPercentage}%
+                        </div>
+                    </div>
+                    <div class="game-content-area">
+                        <iframe title="Helix Rush" class="game-iframe" src={gameResourceUrl}></iframe>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <template if:true={showDeleteQuoteModal}>
+        <div class="delete-quote-modal-backdrop" onclick={handleDeleteQuoteModalBackdrop}>
+            <div class="delete-quote-modal" role="dialog" aria-modal="true" aria-label="Delete Quote">
+                <div class="delete-quote-modal-header">
+                    <h3 class="delete-quote-modal-title">Delete Quote</h3>
+                    <button type="button" class="delete-quote-close-btn" title="Close"
+                        onclick={handleCloseDeleteQuoteModal}>
+                        <lightning-icon icon-name="utility:close" size="x-small"
+                            alternative-text="Close"></lightning-icon>
+                    </button>
+                </div>
+                <div class="delete-quote-modal-body">
+                    <p class="delete-quote-modal-text">Are you sure you want to delete this quote?</p>
+                    <p class="delete-quote-modal-text">This action cannot be undone.</p>
+                </div>
+                <div class="delete-quote-modal-footer">
+                    <button type="button" class="delete-cancel-btn"
+                        onclick={handleCloseDeleteQuoteModal}>Cancel</button>
+                    <button type="button" class="delete-confirm-btn" onclick={handleConfirmDeleteQuote}>Yes, Delete
+                        Quote</button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- Hidden printable quote PDF (used by Download Quote PDF) -->
+    <div class="quote-pdf-container" style="display: none;" aria-hidden="true">
+        <div style="font-family: Arial, sans-serif; width: 80%; margin: 0 auto; padding: 10px; border: 1px solid #ddd;">
+            <div>
+                <img src={ansaLogo} alt="Company Logo" style="max-width: 150px; display: block; margin-bottom: 10px;">
+                <h3>Ansa Biotechnologies, Inc.</h3>
+                <p>1198 65th Street #250<br>Emeryville, California 94608<br>United States</p>
+            </div>
+            <br>
+            <div>
+                <div style="width: 45%; display: inline-block; vertical-align: top;">
+                    <p>
+                        <b>Quote Request:</b> {quoteRequestInfo.quoteNumber}<br>
+                        <b>Contact Name:</b> {quoteRequestInfo.contactName}<br>
+                        <b>Contact Email:</b> {quoteRequestInfo.contactEmail}<br>
+                        <b>Created Date:</b> {quoteRequestCreatedDate}<br>
+                        <b>Expiration Date:</b> {quoteRequestInfo.expiryDate}<br>
+                        <b>Ship To Address:</b> {quoteRequestInfo.shipTo}
+                    </p>
+                </div>
+                <div style="width: 45%; display: inline-block; vertical-align: top; text-align: right;">
+                    <p>
+                        <b>Account Name:</b> {quoteRequestInfo.accountName}<br>
+                        <b>Payment Terms:</b> {quoteRequestInfo.paymentTerms}<br>
+                        <b>Incoterms:</b> {quoteRequestInfo.incoTerms}<br>
+                        <b>Invoice Email:</b> {quoteRequestInfo.invoiceEmail}<br>
+                        <b>Bill To Address:</b> {quoteRequestInfo.billTo}
+                    </p>
+                </div>
+            </div>
+            <br>
+            <div style="margin-bottom: 20px;">
+                <table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
+                    <thead>
+                        <tr>
+                            <th
+                                style="border: 1px solid #ddd; padding: 10px; text-align: left; background-color: #f4f4f4;">
+                                Sequence Name</th>
+                            <th
+                                style="border: 1px solid #ddd; padding: 10px; text-align: left; background-color: #f4f4f4;">
+                                Product</th>
+                            <th
+                                style="border: 1px solid #ddd; padding: 10px; text-align: right; background-color: #f4f4f4;">
+                                Sequence Length</th>
+                            <th
+                                style="border: 1px solid #ddd; padding: 10px; text-align: left; background-color: #f4f4f4;">
+                                Quantity</th>
+                            <th
+                                style="border: 1px solid #ddd; padding: 10px; text-align: left; background-color: #f4f4f4;">
+                                Price (USD)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={pdfLineItems} for:item="item">
+                            <tr key={item.id}>
+                                <td style="border: 1px solid #ddd; padding: 10px; text-align: left;">{item.sequenceName}
+                                </td>
+                                <td style="border: 1px solid #ddd; padding: 10px; text-align: left;">{item.productName}
+                                </td>
+                                <td style="border: 1px solid #ddd; padding: 10px; text-align: right;">{item.length}</td>
+                                <td style="border: 1px solid #ddd; padding: 10px; text-align: left;">{item.quantity}
+                                </td>
+                                <td style="border: 1px solid #ddd; padding: 10px; text-align: left;">
+                                    ${item.formattedPrice}</td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 10px; text-align: left;">Subtotal</td>
+                        <td style="border: 1px solid #ddd; padding: 10px; text-align: left;">
+                            ${quoteRequestInfo.subTotal}</td>
+                    </tr>
+                    <template if:true={showPdfDiscount}>
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 10px; text-align: left;">Discount</td>
+                            <td style="border: 1px solid #ddd; padding: 10px; text-align: left;">
+                                {quoteRequestInfo.formattedDiscount}</td>
+                        </tr>
+                    </template>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 10px; text-align: left;">Shipping Amount</td>
+                        <td style="border: 1px solid #ddd; padding: 10px; text-align: left;">
+                            ${quoteRequestInfo.shippingAmount}</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 10px; text-align: left;">Total Price</td>
+                        <td style="border: 1px solid #ddd; padding: 10px; text-align: left;">
+                            ${quoteRequestInfo.totalPrice}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">Taxes will be determined at time of order.</td>
+                    </tr>
+                </table>
+                <br>
+                <b>Terms &amp; Conditions:</b> {quoteRequestInfo.specialAgreementBeforeUrl}<a if:true={quoteRequestInfo.specialAgreementUrl} href={quoteRequestInfo.specialAgreementUrl} target="_blank">{quoteRequestInfo.specialAgreementUrl}</a>{quoteRequestInfo.specialAgreementAfterUrl}
+                <br><br>
+                <b>Purchase Order Instructions:</b> Please send all purchase orders and purchasing inquiries to&nbsp;<a href="mailto:customerservice@ansabio.com">customerservice@ansabio.com</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden printable End User Quote PDF (IDT Channel Partnership) -->
+    <div class="end-customer-pdf-container" style="display: none;" aria-hidden="true">
+        <div style="font-family: Arial, sans-serif; width: 80%; margin: 0 auto; padding: 10px; border: 1px solid #ddd;">
+            <div>
+                <img src={ansaLogo} alt="Company Logo" style="max-width: 150px; display: block; margin-bottom: 10px;">
+                <h3>Ansa Biotechnologies, Inc.</h3>
+                <p>1198 65th Street #250<br>Emeryville, California 94608<br>United States</p>
+            </div>
+            <br>
+            <div>
+                <div style="width: 45%; display: inline-block; vertical-align: top;">
+                    <p>
+                        <b>Quote Request:</b> {quoteRequestInfo.quoteNumber}<br>
+                        <b>Contact Name:</b> {quoteRequestInfo.contactName}<br>
+                        <b>Contact Email:</b> {quoteRequestInfo.contactEmail}<br>
+                        <b>Created Date:</b> {quoteRequestCreatedDate}<br>
+                        <b>Expiration Date:</b> {quoteRequestInfo.expiryDate}<br>
+                        <b>Ship To Address:</b> {quoteRequestInfo.shipTo}
+                    </p>
+                </div>
+                <div style="width: 45%; display: inline-block; vertical-align: top; text-align: right;">
+                    <p>
+                        <b>Account Name:</b> {quoteRequestInfo.accountName}<br>
+                        <b>Payment Terms:</b> {quoteRequestInfo.paymentTerms}<br>
+                        <b>Incoterms:</b> {quoteRequestInfo.incoTerms}<br>
+                        <b>Invoice Email:</b> {quoteRequestInfo.invoiceEmail}<br>
+                        <b>Bill To Address:</b> {quoteRequestInfo.billTo}
+                    </p>
+                </div>
+            </div>
+            <br>
+            <div style="margin-bottom: 20px;">
+                <table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
+                    <thead>
+                        <tr>
+                            <th
+                                style="border: 1px solid #ddd; padding: 10px; text-align: left; background-color: #f4f4f4;">
+                                Sequence Name</th>
+                            <th
+                                style="border: 1px solid #ddd; padding: 10px; text-align: left; background-color: #f4f4f4;">
+                                Product</th>
+                            <th
+                                style="border: 1px solid #ddd; padding: 10px; text-align: right; background-color: #f4f4f4;">
+                                Sequence Length</th>
+                            <th
+                                style="border: 1px solid #ddd; padding: 10px; text-align: left; background-color: #f4f4f4;">
+                                Quantity</th>
+                            <th
+                                style="border: 1px solid #ddd; padding: 10px; text-align: left; background-color: #f4f4f4;">
+                                End Customer Price (USD)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={endUserPdfLineItems} for:item="item">
+                            <tr key={item.id}>
+                                <td style="border: 1px solid #ddd; padding: 10px; text-align: left;">{item.sequenceName}
+                                </td>
+                                <td style="border: 1px solid #ddd; padding: 10px; text-align: left;">{item.productName}
+                                </td>
+                                <td style="border: 1px solid #ddd; padding: 10px; text-align: right;">{item.length}</td>
+                                <td style="border: 1px solid #ddd; padding: 10px; text-align: left;">{item.quantity}
+                                </td>
+                                <td style="border: 1px solid #ddd; padding: 10px; text-align: left;">
+                                    ${item.formattedEndCustomerPrice}</td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 10px; text-align: left;">Subtotal</td>
+                        <td style="border: 1px solid #ddd; padding: 10px; text-align: left;">
+                            ${quoteRequestInfo.endCustomerSubtotal}</td>
+                    </tr>
+                    <template if:true={showPdfDiscount}>
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 10px; text-align: left;">Discount</td>
+                            <td style="border: 1px solid #ddd; padding: 10px; text-align: left;">
+                                {quoteRequestInfo.formattedDiscount}</td>
+                        </tr>
+                    </template>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 10px; text-align: left;">Shipping Amount</td>
+                        <td style="border: 1px solid #ddd; padding: 10px; text-align: left;">
+                            ${quoteRequestInfo.shippingAmount}</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 10px; text-align: left;">Total Price</td>
+                        <td style="border: 1px solid #ddd; padding: 10px; text-align: left;">
+                            ${quoteRequestInfo.endCustomerTotal}</td>
+                    </tr>
+                </table>
+                <br>
+                <b>Delivery Format:</b> {quoteRequestInfo.deliveryFormat}<br>
+                <b>Yield:</b> {quoteRequestInfo.yield}<br>
+                <b>Terms &amp; Conditions:</b> {quoteRequestInfo.specialAgreementBeforeUrl}<a if:true={quoteRequestInfo.specialAgreementUrl} href={quoteRequestInfo.specialAgreementUrl} target="_blank">{quoteRequestInfo.specialAgreementUrl}</a>{quoteRequestInfo.specialAgreementAfterUrl}
+                <br><br>
+                <b>Purchase Order Instructions:</b> Please send all purchase orders and purchasing inquiries to&nbsp;<a href="mailto:customerservice@ansabio.com">customerservice@ansabio.com</a>
+            </div>
+        </div>
+    </div>
+</template>

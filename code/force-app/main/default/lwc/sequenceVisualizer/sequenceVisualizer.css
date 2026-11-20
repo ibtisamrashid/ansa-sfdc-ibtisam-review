@@ -1,0 +1,60 @@
+:host {
+  display: block;
+}
+.summary {
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+.ruler {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+  font-size: 0.8rem;
+}
+.linear-map {
+  position: relative;
+  margin-bottom: 1rem;
+  border-top: 2px solid #c6d4d9;
+  background: #f6f9fa;
+}
+.feature {
+  stroke: #009add;
+}
+div.feature {
+  position: absolute;
+  min-width: 2px;
+  padding: 3px;
+  overflow: hidden;
+  white-space: nowrap;
+  background: #d2eaf9;
+  border: 1px solid #009add;
+  border-radius: 3px;
+  font-size: 0.7rem;
+}
+div.automatic {
+  background: #d2f2e7;
+  border-color: #209b82;
+}
+path.automatic {
+  stroke: #209b82;
+}
+.circular-map {
+  display: block;
+  width: min(32rem, 100%);
+  margin: auto;
+}
+.bases {
+  max-height: 18rem;
+  overflow: auto;
+  margin-top: 1rem;
+  font-family: monospace;
+  white-space: pre;
+  background: #f6f9fa;
+  padding: 1rem;
+}
+.feature-list {
+  max-height: 10rem;
+  overflow: auto;
+  padding-left: 1.2rem;
+  list-style: disc;
+}

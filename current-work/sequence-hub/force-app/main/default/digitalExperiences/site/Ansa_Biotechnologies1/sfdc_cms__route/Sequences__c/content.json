@@ -1,0 +1,12 @@
+{
+  "type" : "sfdc_cms__route",
+  "title" : "Sequences",
+  "contentBody" : {
+    "activeViewId" : "Sequences",
+    "configurationTags" : [ ],
+    "pageAccess" : "UseParent",
+    "routeType" : "custom-sequences",
+    "urlPrefix" : "sequences"
+  },
+  "urlName" : "sequences"
+}

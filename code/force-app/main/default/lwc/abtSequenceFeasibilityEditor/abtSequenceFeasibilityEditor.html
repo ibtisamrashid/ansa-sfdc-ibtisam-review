@@ -1,0 +1,59 @@
+<template>
+  <div class="feasibility-editor">
+    <div class={boxClass}>
+      <div class="feasibility-backdrop" aria-hidden="true">
+        <pre
+          class="feasibility-highlight"
+        ><template for:each={segments} for:item="segment"><span key={segment.key} class={segment.className} data-start-bp={segment.startBp}>{segment.text}</span></template></pre>
+      </div>
+      <textarea
+        class="feasibility-input"
+        placeholder={placeholder}
+        readonly={readOnly}
+        spellcheck="false"
+        oninput={handleInput}
+        onscroll={handleScroll}
+      ></textarea>
+    </div>
+    <div class={footerClass}>
+      <div class="feasibility-chips">
+        <template if:true={showChips}>
+          <template for:each={chips} for:item="chip">
+            <button
+              key={chip.key}
+              type="button"
+              class={chip.className}
+              data-rank={chip.rank}
+              aria-label={chip.ariaLabel}
+              disabled={chip.disabled}
+              onclick={handleChipClick}
+            >
+              <span class={chip.rankClassName} aria-hidden="true"
+                >{chip.rankLabel}</span
+              >
+              <span class="feasibility-chip-text">{chip.label}</span>
+            </button>
+          </template>
+        </template>
+      </div>
+      <div class="feasibility-actions">
+        <template if:true={showDownload}>
+          <button
+            type="button"
+            class="feasibility-download"
+            onclick={handleDownload}
+          >
+            <c-abt-download-icon
+              size="sm"
+              alternative-text="Download"
+            ></c-abt-download-icon>
+            DOWNLOAD GENBANK
+          </button>
+        </template>
+        <div class="feasibility-action-buttons">
+          <slot name="actions"></slot>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>

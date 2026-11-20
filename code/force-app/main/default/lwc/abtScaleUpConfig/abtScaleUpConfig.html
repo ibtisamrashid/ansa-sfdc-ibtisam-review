@@ -1,0 +1,255 @@
+<template>
+  <div class={containerClass} onclick={stopProp}>
+    <button
+      type="button"
+      class={iconClass}
+      style={iconStyle}
+      onclick={handleIconClick}
+      aria-label="Scale up configuration"
+      aria-expanded={isOpen}
+      disabled={disabled}
+    >
+      <svg
+        class="scaleup-icon-svg"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24.7345 24.7352"
+        aria-hidden="true"
+      >
+        <g>
+          <path
+            d="M 23.80949974060059 21.9586067199707 L 23.80949974060059 23.80960655212402 L 21.95849990844727 23.80960655212402 L 21.95849990844727 24.7356071472168 L 24.73449897766113 24.7356071472168 L 24.73449897766113 21.9586067199707 L 23.80949974060059 21.9586067199707 Z"
+            fill="currentColor"
+            fill-rule="evenodd"
+          />
+          <path
+            d="M 4.443999767303467 24.73500061035156 L 8.61400032043457 24.73500061035156 L 8.61400032043457 23.80999946594238 L 4.443999767303467 23.80999946594238 L 4.443999767303467 24.73500061035156 Z M 10.28299999237061 24.73500061035156 L 14.45300006866455 24.73500061035156 L 14.45300006866455 23.80999946594238 L 10.28299999237061 23.80999946594238 L 10.28299999237061 24.73500061035156 Z M 16.12100028991699 24.73500061035156 L 20.29100036621094 24.73500061035156 L 20.29100036621094 23.80999946594238 L 16.12100028991699 23.80999946594238 L 16.12100028991699 24.73500061035156 Z"
+            fill="currentColor"
+            fill-rule="evenodd"
+          />
+          <path
+            d="M 0 21.9586067199707 L 0 24.7356071472168 L 2.776999950408936 24.7356071472168 L 2.776999950408936 23.80960655212402 L 0.925000011920929 23.80960655212402 L 0.925000011920929 21.9586067199707 L 0 21.9586067199707 Z"
+            fill="currentColor"
+            fill-rule="evenodd"
+          />
+          <path
+            d="M 0 20.29000091552734 L 0.925000011920929 20.29000091552734 L 0.925000011920929 16.1200008392334 L 0 16.1200008392334 L 0 20.29000091552734 Z M 0 14.45199966430664 L 0.925000011920929 14.45199966430664 L 0.925000011920929 10.2810001373291 L 0 10.2810001373291 L 0 14.45199966430664 Z M 0 8.61400032043457 L 0.925000011920929 8.61400032043457 L 0.925000011920929 4.443999767303467 L 0 4.443999767303467 L 0 8.61400032043457 Z"
+            fill="currentColor"
+            fill-rule="evenodd"
+          />
+          <path
+            d="M 0 0.000408172607421875 L 0 2.776409149169922 L 0.925000011920929 2.776409149169922 L 0.925000011920929 0.9254074096679688 L 2.776999950408936 0.9254074096679688 L 2.776999950408936 0.000408172607421875 L 0 0.000408172607421875 Z"
+            fill="currentColor"
+            fill-rule="evenodd"
+          />
+          <path
+            d="M 4.443999767303467 0.9259999990463257 L 8.61400032043457 0.9259999990463257 L 8.61400032043457 0.001000000047497451 L 4.443999767303467 0.001000000047497451 L 4.443999767303467 0.9259999990463257 Z M 10.28299999237061 0.9259999990463257 L 14.45300006866455 0.9259999990463257 L 14.45300006866455 0.001000000047497451 L 10.28299999237061 0.001000000047497451 L 10.28299999237061 0.9259999990463257 Z M 16.12100028991699 0.9259999990463257 L 20.29100036621094 0.9259999990463257 L 20.29100036621094 0.001000000047497451 L 16.12100028991699 0.001000000047497451 L 16.12100028991699 0.9259999990463257 Z"
+            fill="currentColor"
+            fill-rule="evenodd"
+          />
+          <path
+            d="M 21.95820045471191 0.000408172607421875 L 21.95820045471191 0.9254074096679688 L 23.80920028686523 0.9254074096679688 L 23.80920028686523 2.776409149169922 L 24.73419952392578 2.776409149169922 L 24.73419952392578 0.000408172607421875 L 21.95820045471191 0.000408172607421875 Z"
+            fill="currentColor"
+            fill-rule="evenodd"
+          />
+          <path
+            d="M 23.80900001525879 20.29000091552734 L 24.73399925231934 20.29000091552734 L 24.73399925231934 16.1200008392334 L 23.80900001525879 16.1200008392334 L 23.80900001525879 20.29000091552734 Z M 23.80900001525879 14.45199966430664 L 24.73399925231934 14.45199966430664 L 24.73399925231934 10.2810001373291 L 23.80900001525879 10.2810001373291 L 23.80900001525879 14.45199966430664 Z M 23.80900001525879 8.61400032043457 L 24.73399925231934 8.61400032043457 L 24.73399925231934 4.443999767303467 L 23.80900001525879 4.443999767303467 L 23.80900001525879 8.61400032043457 Z"
+            fill="currentColor"
+            fill-rule="evenodd"
+          />
+          <rect
+            x="0"
+            y="0"
+            width="11.904999732971191"
+            height="11.904000282287598"
+            transform="matrix(1,0,0,1,0.46299999952316284,12.367107391357422)"
+            fill="currentColor"
+            fill-rule="evenodd"
+          />
+          <path
+            d="M 0.925000011920929 12.82999992370605 L 11.9040002822876 12.82999992370605 L 11.9040002822876 23.80999946594238 L 0.925000011920929 23.80999946594238 L 0.925000011920929 12.82999992370605 Z M 0 24.73500061035156 L 12.82999992370605 24.73500061035156 L 12.82999992370605 11.90499973297119 L 0 11.90499973297119 L 0 24.73500061035156 Z"
+            fill="currentColor"
+            fill-rule="evenodd"
+          />
+          <rect
+            x="0"
+            y="0"
+            width="8.649330139160156"
+            height="1.851205587387085"
+            transform="matrix(0.7071067690849304,-0.7071067690849304,0.7071067690849304,0.7071067690849304,11.349800109863281,12.076008796691895)"
+            fill="currentColor"
+            fill-rule="evenodd"
+          />
+          <path
+            d="M 14.51350021362305 3.861007690429688 L 20.87350082397461 10.22100830078125 L 20.87250137329102 3.862007141113281 L 14.51350021362305 3.861007690429688 Z"
+            fill="currentColor"
+            fill-rule="evenodd"
+          />
+        </g>
+      </svg>
+    </button>
+
+    <template if:true={isOpen}>
+      <div
+        class="scaleup-popover"
+        onclick={stopProp}
+        role="dialog"
+        aria-label="Scale up configuration"
+      >
+        <span class="scaleup-popover-arrow" aria-hidden="true"></span>
+
+        <p class="scaleup-early-access">{earlyAccessMessage}</p>
+
+        <div class="scaleup-header-row">
+          <div class={quantityFieldClass}>
+            <span class="scaleup-label">Prep Quantity:</span>
+            <c-abt-custom-select
+              class="scaleup-select scaleup-select--quantity"
+              name="scaleup-quantity"
+              size="md"
+              placeholder="0"
+              options={quantitySelectOptions}
+              value={draftQuantity}
+              disabled={disabled}
+              onchange={handleQuantityChange}
+            ></c-abt-custom-select>
+          </div>
+          <button
+            type="button"
+            class="scaleup-definitions-link"
+            onclick={handleDefinitionsClick}
+          >
+            <span>Scale Up Definitions</span>
+            <svg
+              class="scaleup-definitions-icon"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
+              <path
+                d="M12 10.5v5.5M12 8.25h.01"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.75"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <div class="scaleup-body">
+          <div class="scaleup-row-field scaleup-body-cell">
+            <span class="scaleup-label">Copy Number:</span>
+            <span class="scaleup-copy-number-value">{copyNumberDisplay}</span>
+          </div>
+          <div class="scaleup-row-field scaleup-body-cell">
+            <span class="scaleup-label">Buffer:</span>
+            <c-abt-custom-select
+              class="scaleup-select"
+              name="scaleup-buffer"
+              size="md"
+              placeholder="Select..."
+              options={bufferSelectOptions}
+              value={draftBuffer}
+              disabled={disabled}
+              onchange={handleBufferChange}
+            ></c-abt-custom-select>
+          </div>
+        
+          <label class="scaleup-checkbox-row scaleup-body-cell">
+            <input
+              type="checkbox"
+              class="abt-checkbox-native"
+              checked={draftEndotoxinFree}
+              onchange={handleEndotoxinFreeChange}
+              disabled={disabled}
+            />
+            <span class="scaleup-check-text">Endotoxin Free</span>
+          </label>
+          <div class="scaleup-row-field scaleup-body-cell">
+            <span class="scaleup-label">Normalization:</span>
+            <c-abt-custom-select
+              class="scaleup-select"
+              name="scaleup-normalization"
+              size="md"
+              placeholder="Select..."
+              options={normalizationSelectOptions}
+              value={draftNormalization}
+              disabled={disabled}
+              onchange={handleNormalizationChange}
+            ></c-abt-custom-select>
+          </div>
+        
+          <label class="scaleup-checkbox-row scaleup-body-cell">
+            <input
+              type="checkbox"
+              class="abt-checkbox-native"
+              checked={draftGlycerol}
+              onchange={handleGlycerolChange}
+              disabled={disabled}
+            />
+            <span class="scaleup-check-text">Glycerol Stock</span>
+          </label>
+          <template if:true={showApplyCheckbox}>
+            <label class="scaleup-checkbox-row scaleup-body-cell scaleup-checkbox-row--apply">
+              <input
+                type="checkbox"
+                class="abt-checkbox-native"
+                checked={draftApplyToSelected}
+                onchange={handleApplyToSelectedChange}
+                disabled={disabled}
+              />
+              <span class="scaleup-check-text">{applyCheckboxLabel}</span>
+            </label>
+          </template>
+          <template if:false={showApplyCheckbox}>
+            <div class="scaleup-body-cell" aria-hidden="true"></div>
+          </template>
+        </div>
+
+        <template if:true={showQuantityError}>
+          <span class="scaleup-field-error">Prep Quantity is required.</span>
+        </template>
+
+        
+
+        <div class="scaleup-actions-row">
+          <button
+            type="button"
+            class="scaleup-popover-cancel"
+            onclick={handleCancel}
+            disabled={isActionsDisabled}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="scaleup-popover-apply"
+            onclick={handleApply}
+            disabled={isActionsDisabled}
+          >
+            <template if:true={saving}>Processing...</template>
+            <template if:false={saving}>Apply</template>
+          </button>
+        </div>
+
+        <div class="scaleup-footer-row">
+          <div class="scaleup-footer-stat">
+            <span class="scaleup-footer-label">Expected Yield:</span>
+            <strong class="scaleup-footer-value">{massDisplay}</strong>
+          </div>
+          <div class="scaleup-footer-stat">
+            <span class="scaleup-footer-label">Scale Up Price:</span>
+            <strong class="scaleup-footer-value">{priceDisplay}</strong>
+          </div>
+        </div>
+      </div>
+    </template>
+  </div>
+</template>

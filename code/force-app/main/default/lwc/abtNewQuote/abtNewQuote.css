@@ -1,0 +1,2264 @@
+:host {
+  display: block;
+  width: 100%;
+  --abt-checkbox-tick-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%221243.0099804922288%20469.1957397460937%2015.979414649372757%2012.60852112884811%22%3E%3Cpath%20fill%3D%22%23009add%22%20fill-rule%3D%22evenodd%22%20transform%3D%22matrix(1%2C0%2C0%2C1%2C1124.81982421875%2C247.9515380859375)%22%20d%3D%22M%20123.9110260009766%20233.7408752441406%20C%20123.9817123413086%20233.8125305175781%20124.0781326293945%20233.8527679443359%20124.1787261962891%20233.8527221679688%20C%20124.279899597168%20233.8529052734375%20124.3769683837891%20233.8125915527344%20124.448356628418%20233.7408752441406%20L%20134.0581207275391%20224.1371154785156%20C%20134.1294555664062%20224.06591796875%20134.1695709228516%20223.9692993164062%20134.1695709228516%20223.8684387207031%20C%20134.1695709228516%20223.7676544189453%20134.1294555664062%20223.6710357666016%20134.0581207275391%20223.5998229980469%20L%20131.8029937744141%20221.356689453125%20C%20131.7317352294922%20221.2847137451172%20131.6346588134766%20221.2442016601562%20131.5333557128906%20221.2442016601562%20C%20131.4320526123047%20221.2442016601562%20131.3349609375%20221.2847137451172%20131.2637023925781%20221.356689453125%20L%20124.1727447509766%20228.4476470947266%20L%20121.0906829833984%20225.3515930175781%20C%20121.0193405151367%20225.2796325683594%20120.9222717285156%20225.2391204833984%20120.8209762573242%20225.2391204833984%20C%20120.7197341918945%20225.2391204833984%20120.6225891113281%20225.2796325683594%20120.5513305664062%20225.3515930175781%20L%20118.3021926879883%20227.6007385253906%20C%20118.2304077148438%20227.6720581054688%20118.1901702880859%20227.7691345214844%20118.1902923583984%20227.8703765869141%20C%20118.1874923706055%20227.9744110107422%20118.2280044555664%20228.0749969482422%20118.3021926879883%20228.1480255126953%20L%20123.9110260009766%20233.7408752441406%20Z%22%2F%3E%3C%2Fsvg%3E");
+  --abt-checkbox-size: 20px;
+  --abt-checkbox-border-width: 1px;
+  --abt-checkbox-padding: 3px;
+  --abt-checkbox-outline-offset: 4px;
+  --abt-checkbox-tick-image-white: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%221243.0099804922288%20469.1957397460937%2015.979414649372757%2012.60852112884811%22%3E%3Cpath%20fill%3D%22%23ffffff%22%20fill-rule%3D%22evenodd%22%20transform%3D%22matrix(1%2C0%2C0%2C1%2C1124.81982421875%2C247.9515380859375)%22%20d%3D%22M%20123.9110260009766%20233.7408752441406%20C%20123.9817123413086%20233.8125305175781%20124.0781326293945%20233.8527679443359%20124.1787261962891%20233.8527221679688%20C%20124.279899597168%20233.8529052734375%20124.3769683837891%20233.8125915527344%20124.448356628418%20233.7408752441406%20L%20134.0581207275391%20224.1371154785156%20C%20134.1294555664062%20224.06591796875%20134.1695709228516%20223.9692993164062%20134.1695709228516%20223.8684387207031%20C%20134.1695709228516%20223.7676544189453%20134.1294555664062%20223.6710357666016%20134.0581207275391%20223.5998229980469%20L%20131.8029937744141%20221.356689453125%20C%20131.7317352294922%20221.2847137451172%20131.6346588134766%20221.2442016601562%20131.5333557128906%20221.2442016601562%20C%20131.4320526123047%20221.2442016601562%20131.3349609375%20221.2847137451172%20131.2637023925781%20221.356689453125%20L%20124.1727447509766%20228.4476470947266%20L%20121.0906829833984%20225.3515930175781%20C%20121.0193405151367%20225.2796325683594%20120.9222717285156%20225.2391204833984%20120.8209762573242%20225.2391204833984%20C%20120.7197341918945%20225.2391204833984%20120.6225891113281%20225.2796325683594%20120.5513305664062%20225.3515930175781%20L%20118.3021926879883%20227.6007385253906%20C%20118.2304077148438%20227.6720581054688%20118.1901702880859%20227.7691345214844%20118.1902923583984%20227.8703765869141%20C%20118.1874923706055%20227.9744110107422%20118.2280044555664%20228.0749969482422%20118.3021926879883%20228.1480255126953%20L%20123.9110260009766%20233.7408752441406%20Z%22%2F%3E%3C%2Fsvg%3E");
+}
+
+.abt-checkbox-native,
+.step3-bulk-checkbox,
+.step3-th-check input[type="checkbox"],
+.step3-td-check input[type="checkbox"],
+.step3-td-toxic input[type="checkbox"],
+.step3-td-glycerol input[type="checkbox"],
+.step3-td-scaleup input[type="checkbox"],
+.checkout-check-label input[type="checkbox"],
+.check-row input[type="checkbox"],
+.reflex-popover-label input[type="checkbox"] {
+  -webkit-appearance: none;
+  appearance: none;
+  box-sizing: border-box;
+  width: var(--abt-checkbox-size);
+  height: var(--abt-checkbox-size);
+  min-width: var(--abt-checkbox-size);
+  min-height: var(--abt-checkbox-size);
+  margin: 0;
+  padding: var(--abt-checkbox-padding);
+  border: var(--abt-checkbox-border-width) solid #707070;
+  border-radius: 3px;
+  background-color: #ffffff;
+  background-repeat: no-repeat;
+  background-position: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+.abt-checkbox-native:checked,
+.step3-bulk-checkbox:checked,
+.step3-th-check input[type="checkbox"]:checked,
+.step3-td-check input[type="checkbox"]:checked,
+.step3-td-toxic input[type="checkbox"]:checked,
+.step3-td-glycerol input[type="checkbox"]:checked,
+.step3-td-scaleup input[type="checkbox"]:checked,
+.checkout-check-label input[type="checkbox"]:checked,
+.check-row input[type="checkbox"]:checked,
+.reflex-popover-label input[type="checkbox"]:checked {
+  background-color: #ffffff;
+  background-image: var(--abt-checkbox-tick-image);
+  background-origin: content-box;
+  background-clip: content-box;
+  background-size: 100% 100%;
+}
+
+.abt-checkbox-native:disabled,
+.step3-bulk-checkbox:disabled,
+.step3-th-check input[type="checkbox"]:disabled,
+.step3-td-check input[type="checkbox"]:disabled,
+.step3-td-toxic input[type="checkbox"]:disabled,
+.step3-td-glycerol input[type="checkbox"]:disabled,
+.step3-td-scaleup input[type="checkbox"]:disabled,
+.checkout-check-label input[type="checkbox"]:disabled,
+.check-row input[type="checkbox"]:disabled,
+.reflex-popover-label input[type="checkbox"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Glycerol inactive (e.g. Scale Up selected): stronger grey on the checkbox only */
+.step3-td-glycerol input[type="checkbox"]:disabled,
+.step3-bulk-field--glycerol input[type="checkbox"]:disabled {
+  opacity: 0.28;
+  background-color: #cfcfcf;
+  border-color: #8a8a8a;
+  box-shadow: none;
+}
+
+.abt-checkbox-native:focus-visible,
+.step3-bulk-checkbox:focus-visible,
+.step3-th-check input[type="checkbox"]:focus-visible,
+.step3-td-check input[type="checkbox"]:focus-visible,
+.step3-td-toxic input[type="checkbox"]:focus-visible,
+.step3-td-glycerol input[type="checkbox"]:focus-visible,
+.step3-td-scaleup input[type="checkbox"]:focus-visible,
+.checkout-check-label input[type="checkbox"]:focus-visible,
+.check-row input[type="checkbox"]:focus-visible,
+.reflex-popover-label input[type="checkbox"]:focus-visible {
+  outline: 2px solid #009add;
+  outline-offset: var(--abt-checkbox-outline-offset);
+}
+
+/* Table header checkboxes on teal background */
+.step3-th-check input[type="checkbox"] {
+  border: var(--abt-checkbox-border-width) solid #ffffff;
+  background-color: transparent;
+  background-image: none;
+}
+
+.step3-th-check input[type="checkbox"]:checked {
+  border: var(--abt-checkbox-border-width) solid #ffffff;
+  background-color: transparent;
+  background-image: var(--abt-checkbox-tick-image-white);
+  background-origin: content-box;
+  background-clip: content-box;
+  background-size: 100% 100%;
+}
+
+.step3-th-check input[type="checkbox"]:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: var(--abt-checkbox-outline-offset);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   QUOTE PAGE CONTAINER
+   ═══════════════════════════════════════════════════════════════════════ */
+.quote-page {
+  background: #fff;
+  border-radius: 8px;
+  max-width: var(--abt-page-content-max-width, 1346px);
+  width: 100%;
+  margin: 0 auto;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  min-height: 400px;
+  font-family:
+    "DM Sans",
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+/* ─── Header (XD: DM Sans 36px / 700 / #1C1C1C) ─────────────────────── */
+/* XD: 27px space from heading to sub-heading (step row) */
+.quote-header {
+  padding: 20px 24px 0 24px;
+  margin-bottom: 27px;
+}
+
+.quote-title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #1c1c1c;
+  margin: 0;
+  letter-spacing: 0;
+}
+
+/* Step row: sub-heading + optional step-2 download (XD: same row, ends aligned) */
+/* XD: 8px space from sub-heading to instruction / body content */
+.quote-step-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 0 24px 0 24px;
+  margin-bottom: 8px;
+}
+
+/* ─── Step Label (XD: 24px / 700; "Step n/n:" = table-header teal) ─── */
+.step-label {
+  flex: 1;
+  min-width: min(100%, 280px);
+}
+
+.step-fraction-badge {
+  color: #1ec6b6;
+  font-weight: 700;
+  font-size: 1.5rem;
+  letter-spacing: 0;
+}
+
+.step-name {
+  font-weight: 700;
+  color: #1c1c1c;
+  font-size: 1.5rem;
+  margin-left: 6px;
+  letter-spacing: 0;
+}
+
+.step2-download-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* ─── Body ──────────────────────────────────────────────────────────── */
+.quote-body {
+  padding: 0 24px 14px 24px;
+  flex: 1;
+  overflow: visible;
+}
+
+/* Step 3/4 header band sits outside quote-body (same as abt_QuoteDetails) */
+.quote-page .quote-step-shell > .step4-header-band {
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+.quote-step-shell {
+  display: contents;
+}
+
+.quote-loading {
+  display: flex;
+  justify-content: center;
+  padding: 40px 0;
+}
+
+.quote-calculation-status {
+  margin: 0;
+}
+
+.quote-calculation-status-pending {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1c1c1c;
+  background-color: rgba(30, 198, 182, 0.15);
+  padding: 6px 10px;
+  border-radius: 8px;
+  line-height: 1.35;
+}
+
+.quote-calculation-status-complete {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #2e844a;
+  line-height: 1.35;
+}
+
+.quote-calculation-check {
+  --slds-c-icon-color-foreground-default: #2e844a;
+}
+
+.game-trigger-link {
+  color: #009add;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.game-trigger-link-bold {
+  font-weight: bold;
+}
+
+.game-trigger-link:hover {
+  color: #0283bb;
+  text-decoration: underline;
+}
+
+.game-trigger-separator {
+  margin: 0 8px;
+  color: #706e6b;
+}
+
+.game-modal-container {
+  width: 90% !important;
+  max-width: 550px !important;
+  max-height: 960px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding-bottom: 0 !important;
+}
+
+.game-modal-header {
+  padding: 0.5rem 1rem !important;
+  flex-shrink: 0 !important;
+}
+
+.game-modal-content {
+  padding: 0.5rem 1rem 1rem 1rem !important;
+  flex: 1 1 auto !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+}
+
+.game-status-indicator {
+  background-color: #f3f3f3;
+  border: 1px solid #dddbda;
+  border-radius: 4px;
+  padding: 6px 10px;
+  flex-shrink: 0;
+}
+
+.game-progress-bar {
+  width: 100%;
+  height: 14px;
+  background-color: #e0e5ee;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.game-progress-fill {
+  height: 100%;
+  background: linear-gradient(to right, #0070d2, #4bca81);
+  border-radius: 8px;
+  transition: width 0.5s ease;
+  min-width: 2%;
+}
+
+.game-content-area {
+  flex: 1 1 auto !important;
+  border: 1px solid #dddbda;
+  border-radius: 4px;
+  overflow: hidden;
+  background-color: #ffffff;
+  margin-top: 0.5rem;
+  min-height: 420px !important;
+}
+
+.game-iframe {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 420px !important;
+  border: none !important;
+}
+
+.dot-loading {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 2px;
+  vertical-align: middle;
+}
+
+.dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-right: 3px;
+  background: #009add;
+  animation: quote-dot-pulse 1.5s infinite ease-in-out;
+}
+
+.dot1 {
+  animation-delay: 0s;
+}
+
+.dot2 {
+  animation-delay: 0.2s;
+}
+
+.dot3 {
+  animation-delay: 0.4s;
+}
+
+@keyframes quote-dot-pulse {
+  0%,
+  80%,
+  100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+
+  40% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+/* ─── Footer ────────────────────────────────────────────────────────── */
+.quote-footer {
+  display: flex;
+  align-items: center;
+  padding: 12px 24px;
+  border-top: 1px solid #e5e5e5;
+  /* Match .step-content-card (#f8f8f8) — same panel tone as the fields container */
+  background: #fff;
+}
+
+.footer-spacer {
+  flex: 1;
+}
+
+.footer-btn-back {
+  padding: 11px 22px;
+  background: #fff;
+  color: #222;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: 1px solid #707070;
+  border-radius: 6px;
+  cursor: pointer;
+  min-width: 130px;
+  text-align: center;
+}
+
+.footer-btn-next {
+  padding: 10px 22px;
+  background: #009add;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 6px;
+  min-width: 128px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.footer-btn-back:hover {
+  background: #f7f7f7;
+}
+
+.footer-btn-next:hover {
+  background: #0089c6;
+}
+
+.footer-btn-next:disabled {
+  background: #9fd3ea;
+  opacity: 1;
+  color: #fff;
+  cursor: not-allowed;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   STEP 1: Choose Clonal DNA Defaults
+   ═══════════════════════════════════════════════════════════════════════ */
+.step-content-card {
+  background: #f8f8f8;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 16px 18px;
+}
+
+.step-fields-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.85fr) minmax(240px, 1fr);
+  column-gap: 24px;
+  row-gap: 0;
+  align-items: start;
+}
+
+.step-fields-row--fragment {
+  align-items: center;
+}
+
+.quote-body--centered {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.step-fields-row--fragment .step-fields-aside {
+  display: flex;
+  align-items: center;
+}
+
+.step-fields-main {
+  grid-column: 1;
+  min-width: 0;
+}
+
+.step-fields-aside {
+  grid-column: 2;
+  min-width: 0;
+  align-self: start;
+}
+
+.field-group {
+  margin-bottom: 0;
+}
+
+/* Step 1: labels on row 1, controls on row 2 — keeps left/right columns aligned */
+.field-row-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 52px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 14px;
+  row-gap: 14px;
+  align-items: start;
+}
+
+.field-row-grid__l1 {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+}
+
+.field-row-grid__l2 {
+  grid-column: 3;
+  grid-row: 1;
+  min-width: 0;
+}
+
+.field-row-grid__c1 {
+  grid-column: 1;
+  grid-row: 2;
+  min-width: 0;
+}
+
+.field-row-grid__mid {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #888;
+  font-size: 0.9rem;
+  align-self: stretch;
+}
+
+.field-row-grid__mid--spacer {
+  visibility: hidden;
+}
+
+.field-row-grid__c2 {
+  grid-column: 3;
+  grid-row: 2;
+  min-width: 0;
+}
+
+.field-row-grid .field-label {
+  margin-bottom: 0;
+  line-height: 1.35;
+}
+
+.manual-vector-field {
+  position: relative;
+  overflow: visible;
+}
+
+.field-combobox,
+.field-input {
+  /* Modern SLDS hooks */
+  --slds-c-input-color-border: #8f8f8f;
+  --slds-c-input-radius-border: 0.45rem;
+  --slds-c-input-spacing-inline-start: 0.9rem;
+  --slds-c-input-spacing-inline-end: 2rem;
+  --slds-c-input-sizing-min-height: 3.5rem;
+  --slds-c-input-text-font-size: 0.95rem;
+  --slds-c-input-text-color: #575757;
+  --slds-c-input-text-color-placeholder: #7a7a7a;
+  --slds-c-input-line-height: 1.4;
+
+  /* Legacy SDS hooks (needed by some base components) */
+  --sds-c-input-color-border: #8f8f8f;
+  --sds-c-input-radius-border: 0.45rem;
+  --sds-c-input-spacing-inline-start: 0.9rem;
+  --sds-c-input-spacing-inline-end: 2rem;
+  --sds-c-input-sizing-min-height: 3.5rem;
+  --sds-c-input-text-font-size: 0.95rem;
+  --sds-c-input-text-color: #575757;
+  --sds-c-input-text-color-placeholder: #7a7a7a;
+}
+
+.field-text-input {
+  width: 100%;
+  min-height: 2rem;
+  border: 1px solid #c9c9c9;
+  border-radius: 0.25rem;
+  padding: 0 0.75rem;
+  font-size: 0.875rem;
+  color: #181818;
+  background: #fff;
+}
+
+.field-text-input::placeholder {
+  color: #706e6b;
+}
+
+.field-text-input:focus {
+  outline: none;
+  border-color: #1b96ff;
+  box-shadow: 0 0 0 1px #1b96ff inset;
+}
+
+.field-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+.field-optional {
+  font-weight: 400;
+  color: #666;
+}
+
+.field-separator {
+  border-top: 1px solid #e0e0e0;
+  margin: 18px 0 16px;
+}
+
+.glycerol-row {
+  margin-top: 14px;
+}
+
+.help-text-block {
+  background: transparent;
+  font-size: 0.95rem;
+  color: #444;
+  line-height: 1.45;
+}
+
+.help-text-block p {
+  margin: 0;
+  overflow-wrap: break-word;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   STEP 2: Add Sequences
+   ═══════════════════════════════════════════════════════════════════════ */
+.quote-download-link,
+.step2-download-link,
+.step3-download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  background: none;
+  color: #1c1c1c;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1.25;
+}
+
+.quote-download-link:hover:not(:disabled),
+.step2-download-link:hover:not(:disabled),
+.step3-download-btn:hover:not(:disabled) {
+  color: #1c1c1c;
+  text-decoration: underline;
+}
+
+.quote-download-link:disabled,
+.step3-download-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.step2-options-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  background: #fafafa;
+  padding: 32px 24px;
+}
+
+.step2-option {
+  flex: 1;
+  text-align: center;
+  padding: 0 18px;
+}
+
+.step2-divider {
+  width: 1px;
+  background: #e0e0e0;
+  align-self: stretch;
+  min-height: 180px;
+}
+
+.step2-icon-wrap {
+  margin-bottom: 12px;
+}
+
+.step2-option-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #222;
+}
+
+.step2-option-desc {
+  font-size: 0.82rem;
+  color: #666;
+  margin-bottom: 14px;
+  line-height: 1.4;
+}
+
+.step2-upload-controls {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+  text-align: left;
+  max-width: 100%;
+}
+
+.step2-browse-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+}
+
+.step2-browse-btn {
+  display: inline-block;
+  padding: 7px 22px;
+  border: 1.5px solid #1ba8e0;
+  border-radius: 5px;
+  color: #1ba8e0;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  background: #fff;
+  flex-shrink: 0;
+}
+
+.step2-formats {
+  font-size: 0.72rem;
+  color: #999;
+  text-align: left;
+}
+
+.step2-select-btn {
+  padding: 7px 28px;
+  border: 1.5px solid #1ba8e0;
+  border-radius: 5px;
+  color: #1ba8e0;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  background: #fff;
+}
+
+.step2-file-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  width: 100%;
+  max-width: none;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  overflow: visible;
+}
+
+.step2-file-list .step2-file-row {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) 24px;
+  align-items: center;
+  column-gap: 8px;
+  margin: 0;
+  padding: 2px 0;
+  justify-content: initial;
+  border-bottom: none;
+}
+
+.step2-file-list .step2-file-row:last-child {
+  border-bottom: none;
+}
+
+.step2-file-list .step2-file-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.step2-file-list .step2-file-name {
+  min-width: 0;
+  font-size: 0.82rem;
+  color: #444;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.step2-file-list .step2-file-delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 22px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.step2-file-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  margin-bottom: 4px;
+  justify-content: center;
+}
+
+.step2-file-name {
+  font-size: 0.82rem;
+  color: #444;
+}
+
+.step2-file-delete {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+}
+
+.step2-validation-error {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: #fef1ee;
+  border: 1px solid #f3b6ae;
+  color: #c23934;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   STEP 3: Review Sequences Table
+   ═══════════════════════════════════════════════════════════════════════ */
+.step3-body {
+  padding-bottom: 8px;
+}
+
+/* Step 3 Add Sequence — same top-right column layout as step 4 packaging */
+.step3-add-sequence-btn {
+  min-width: 10.5rem;
+  max-width: 13.5rem;
+  width: 100%;
+  white-space: nowrap;
+}
+
+/* ─── Error Banner ──────────────────────────────────────────────────── */
+.sequence-error-banner {
+  background: #f44336;
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.error-banner-text {
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.sequence-warning-icon {
+  color: #f44336;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+/* ─── Table Styles ──────────────────────────────────────────────────── */
+/* XD: instruction line DM Sans 16px / 400 */
+.step3-subtitle {
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.45;
+  color: #555555;
+  margin: 0 0 10px 0;
+}
+
+.step4-bulk-action-slot {
+  position: relative;
+  z-index: 300;
+  overflow: visible;
+  align-items: flex-start;
+}
+
+.step4-bulk-action-slot--open {
+  z-index: 500;
+}
+
+.step3-bulk-controls--header {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  flex-shrink: 0;
+}
+
+.step3-bulk-field {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+}
+
+.step3-bulk-label {
+  font-family:
+    "DM Sans",
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.25;
+  color: #1c1c1c;
+  white-space: nowrap;
+  min-height: 1.25rem;
+  display: block;
+  padding: 0;
+  margin: 0;
+}
+
+.step3-bulk-field--toxic,
+.step3-bulk-field--reflex,
+.step3-bulk-field--glycerol {
+  align-items: center;
+  width: fit-content;
+}
+
+.step3-bulk-field--toxic .step3-bulk-label,
+.step3-bulk-field--reflex .step3-bulk-label,
+.step3-bulk-field--glycerol .step3-bulk-label {
+  text-align: center;
+  width: 100%;
+}
+
+.step3-bulk-control-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 2rem;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+.step3-bulk-field--toxic .step3-bulk-control-row,
+.step3-bulk-field--reflex .step3-bulk-control-row,
+.step3-bulk-field--glycerol .step3-bulk-control-row {
+  justify-content: center;
+}
+
+.step3-bulk-field--vector .step3-bulk-vector-cell {
+  min-height: 2rem;
+  align-items: center;
+}
+
+.step3-bulk-field--vector {
+  min-width: 11rem;
+  max-width: 16rem;
+}
+
+.step3-bulk-vector-cell {
+  width: 100%;
+  min-width: 11rem;
+}
+
+.step3-bulk-field--vector .step3-bulk-vector-select {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.glycerol-checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.glycerol-checkbox-text {
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* Match order list / quote list: rounded wrapper clips header + body corners */
+.step3-table-wrap {
+  overflow: hidden;
+  width: 100%;
+  max-width: 100%;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+  position: relative;
+}
+
+/* Let header tooltips render outside the clipped table box */
+.step3-table-wrap:has(.quote-th-tooltip-wrap:hover),
+.step3-table-wrap:has(.quote-th-tooltip-wrap:focus-within),
+.step3-table-wrap:has(c-abt-homopolymer-flag-icon:hover),
+.step3-table-wrap:has(c-abt-homopolymer-flag-icon:focus-within),
+.step3-table-wrap--reflex-open {
+  overflow: visible;
+  z-index: 200;
+}
+
+.step3-table tbody tr:last-child .step3-td {
+  border-bottom: none;
+}
+
+/* Invalid character highlighting */
+.invalid-char {
+  color: #e74c3c;
+  font-weight: 700;
+}
+
+.step3-table {
+  width: 100%;
+  min-width: 0;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  table-layout: fixed;
+}
+
+/* Step 4: denser header text so long labels wrap within column (no horizontal scroll) */
+.step4-line-table .step3-th {
+  font-size: 0.72rem;
+  padding: 9px 10px;
+  line-height: 1.2;
+}
+
+.step3-th {
+  background: #1ec6b6;
+  color: #fff;
+  font-weight: 700;
+  padding: 10px 10px;
+  text-align: left;
+  white-space: normal;
+  line-height: 1.25;
+  vertical-align: middle;
+  overflow-wrap: break-word;
+  font-size: 0.8rem;
+}
+
+.step3-th.step3-th-check,
+.step3-td.step3-td-check {
+  width: 2rem;
+  min-width: 2rem;
+  max-width: 2rem;
+  padding-left: 8px;
+  padding-right: 0;
+  text-align: left;
+  vertical-align: middle;
+  box-sizing: border-box;
+}
+
+.step3-th.step3-th-check {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.step3-td.step3-td-check {
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+
+.step4-line-table .step3-th.step3-th-check {
+  padding-top: 9px;
+  padding-bottom: 9px;
+}
+
+.step3-th-num {
+  text-align: left;
+  white-space: nowrap;
+}
+
+.step3-th-toxic {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.step3-th-glycerol,
+.step3-th-addl {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.step3-th-scaleup {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.step3-th-icon {
+  width: 1.75rem;
+  min-width: 1.75rem;
+  max-width: 1.75rem;
+  text-align: center;
+}
+
+.step3-row {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.step3-row:focus-within {
+  position: relative;
+  z-index: 40;
+}
+
+.step3-row:hover {
+  background: #f5fafa;
+}
+
+.step3-td {
+  padding: 7px 10px;
+  border-bottom: 1px solid #eee;
+  vertical-align: middle;
+}
+
+/* After .step3-td — keep header/body left edges aligned per column */
+.step3-th.step3-th-name,
+.step3-td.step3-td-name {
+  padding-left: 0;
+  padding-right: 10px;
+}
+
+.step4-line-table .step3-th.step3-th-name {
+  padding-top: 9px;
+  padding-bottom: 9px;
+  padding-left: 0;
+  padding-right: 10px;
+}
+
+.step4-line-table .step3-td.step3-td-name {
+  padding-left: 0;
+  padding-right: 10px;
+}
+
+.step3-th.step3-th-toxic,
+.step3-td.step3-td-toxic {
+  padding-left: 10px;
+  padding-right: 10px;
+  text-align: center;
+}
+
+.step3-th.step3-th-glycerol,
+.step3-td.step3-td-glycerol,
+.step3-th.step3-th-addl,
+.step3-td.step3-td-addl {
+  padding-left: 10px;
+  padding-right: 10px;
+  text-align: center;
+}
+
+.step4-line-table .step3-th.step3-th-toxic,
+.step4-line-table .step3-th.step3-th-glycerol {
+  padding-top: 9px;
+  padding-bottom: 9px;
+}
+
+.step3-td:not(.step3-td-combobox):not(.step3-td-check):not(.step3-td-icon):not(
+    .step3-td-vector
+  ):not(.step3-td-scaleup) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.step3-td-scaleup {
+  overflow: visible;
+}
+
+.step3-scaleup-cell {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+}
+
+.step3-td-scaleup input[type="checkbox"],
+.step3-scaleup-updating {
+  display: block;
+  margin: 0;
+  flex-shrink: 0;
+  grid-column: 2;
+  justify-self: center;
+}
+
+.step3-scaleup-cell c-abt-scale-up-config {
+  grid-column: 3;
+  justify-self: end;
+}
+
+.step3-td-name {
+  font-weight: 600;
+  color: #222;
+}
+
+.step3-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.step3-name-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.step3-row--draft .step3-draft-input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
+  font-size: inherit;
+  font-family: inherit;
+  font-weight: inherit;
+  color: #1c1c1c;
+  background: transparent;
+  line-height: inherit;
+  box-shadow: none;
+}
+
+.step3-row--draft .step3-draft-input--seq {
+  font-family: monospace;
+  font-size: 0.78rem;
+  color: #555;
+}
+
+.step3-row--draft .step3-draft-input:focus {
+  outline: none;
+  border: none;
+  box-shadow: none;
+  background: transparent;
+}
+
+.step3-row--draft .step3-draft-input--error {
+  color: #c23934;
+}
+
+.step3-row--draft .step3-draft-input--error:focus {
+  color: #c23934;
+}
+
+.step3-row--draft .step3-draft-input:disabled {
+  opacity: 0.65;
+  background: transparent;
+}
+
+.step3-name-cell--draft {
+  width: 100%;
+}
+
+.step3-name-cell--draft .step3-draft-input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.step3-draft-seq-cell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  width: 100%;
+}
+
+.step3-draft-seq-cell .step3-draft-input--seq {
+  flex: 1;
+  min-width: 0;
+}
+
+.step3-row--draft .step3-td-name,
+.step3-row--draft .step3-td-seq {
+  overflow: visible;
+}
+
+.step3-row--draft:hover {
+  background: #fafafa;
+}
+
+.step3-row--draft.step3-row--draft-saving {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.step3-row--draft.step3-row--draft-saving:hover {
+  background: transparent;
+}
+
+.step3-row-loading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1rem;
+}
+
+.step3-row-loading .dot-loading {
+  margin-left: 0;
+}
+
+.step3-row-loading .dot:last-child {
+  margin-right: 0;
+}
+
+.step3-td-icon {
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  overflow: visible;
+}
+
+.step3-row--draft .step3-td-icon {
+  cursor: default;
+  position: relative;
+  min-width: 2rem;
+}
+
+.step3-row-loading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1rem;
+}
+
+.step3-row-loading .dot-loading {
+  margin-left: 0;
+}
+
+.step3-row-loading .dot:last-child {
+  margin-right: 0;
+}
+
+.step3-td-seq {
+  font-family: monospace;
+  font-size: 0.78rem;
+  color: #555;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.step3-td-num {
+  text-align: left;
+}
+
+.step3-td-toxic {
+  text-align: center;
+}
+
+.step3-td-glycerol,
+.step3-td-addl {
+  text-align: center;
+}
+
+.step3-td-icon {
+  text-align: center;
+  cursor: pointer;
+}
+
+.step3-th-check input[type="checkbox"],
+.step3-td-check input[type="checkbox"] {
+  display: block;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.step3-td-toxic input[type="checkbox"] {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  flex-shrink: 0;
+}
+
+.step3-td-glycerol input[type="checkbox"],
+.step3-glycerol-updating {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  flex-shrink: 0;
+}
+
+.step4-total-item--glycerol b {
+  min-width: 4.5rem;
+  display: inline-block;
+}
+
+.step3-td-combobox {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  z-index: 3;
+}
+
+.step3-td-combobox:focus-within {
+  overflow: visible;
+  z-index: 40;
+}
+
+/* Step 3 sequence table — % widths (fits card; variants when vector hidden) */
+.step3-body .step3-th-icon,
+.step3-body .step3-td-icon {
+  width: 1.75rem;
+  min-width: 1.75rem;
+  max-width: 1.75rem;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+.step3-body .step3-th-name,
+.step3-body .step3-td-name {
+  width: 12%;
+  min-width: 0;
+}
+
+.step3-body .step3-th-seq,
+.step3-body .step3-td-seq {
+  width: 22%;
+  max-width: none;
+}
+
+.step3-body .step3-th-num,
+.step3-body .step3-td-num {
+  width: 10%;
+  min-width: 6.25rem;
+}
+
+.step3-body .step3-th-vector,
+.step3-body .step3-td-vector {
+  width: 20%;
+  min-width: 0;
+  position: relative;
+  overflow: visible;
+  z-index: auto;
+}
+
+.step3-vector-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 0;
+  width: 100%;
+}
+
+.step3-vector-reflex-slot {
+  flex: 0 0 1.75rem;
+  width: 1.75rem;
+  min-width: 1.75rem;
+  height: 1.75rem;
+}
+
+.step3-vector-cell .step3-inline-select,
+.step3-vector-cell .step3-vector-select {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: calc(100% - 1.75rem - 0.25rem);
+}
+
+.step3-vector-cell:has(c-abt-homopolymer-flag-icon) .step3-inline-select,
+.step3-vector-cell:has(c-abt-homopolymer-flag-icon) .step3-vector-select {
+  width: calc(100% - 1.75rem - 1.35rem - 0.5rem);
+}
+
+.step3-td-vector--popover-open {
+  overflow: visible;
+  z-index: 60;
+}
+
+.step3-body .step3-td-vector:hover,
+.step3-body .step3-td-vector:focus-within {
+  overflow: visible;
+  z-index: 40;
+}
+
+.step3-body .step3-td-vector:has(c-abt-homopolymer-flag-icon:hover),
+.step3-body .step3-td-vector:has(c-abt-homopolymer-flag-icon:focus-within) {
+  z-index: 10050;
+}
+
+.step3-body .step3-th-feasibility,
+.step3-body .step3-td-feasibility {
+  width: 11%;
+  min-width: 6.75rem;
+}
+
+.step3-body .step3-th-feasibility {
+  white-space: nowrap;
+}
+
+.step3-body .step3-th-toxic,
+.step3-body .step3-td-toxic {
+  width: 10%;
+  min-width: 7.5rem;
+}
+
+/* Vector hidden (fragments / XL clonal) — redistribute vector column space */
+.step3-body .step3-table--no-vector .step3-th-name,
+.step3-body .step3-table--no-vector .step3-td-name {
+  width: 14%;
+}
+
+.step3-body .step3-table--no-vector .step3-th-seq,
+.step3-body .step3-table--no-vector .step3-td-seq {
+  width: 28%;
+}
+
+.step3-body .step3-table--no-vector .step3-th-num,
+.step3-body .step3-table--no-vector .step3-td-num {
+  width: 10%;
+  min-width: 6.25rem;
+}
+
+.step3-body .step3-table--no-vector .step3-th-feasibility,
+.step3-body .step3-table--no-vector .step3-td-feasibility {
+  width: 13%;
+  min-width: 6.75rem;
+}
+
+.step3-body .step3-table--no-vector .step3-th-toxic,
+.step3-body .step3-table--no-vector .step3-td-toxic {
+  width: 12%;
+  min-width: 7.5rem;
+}
+
+/* Step 4 pricing table — proportional columns */
+.step4-line-table .step3-th-check,
+.step4-line-table .step3-td-check {
+  width: 2rem;
+  min-width: 2rem;
+  max-width: 2rem;
+  padding-left: 8px;
+  padding-right: 0;
+}
+
+.step4-line-table .step3-th-icon,
+.step4-line-table .step3-td-icon {
+  width: 1.75rem;
+  min-width: 1.75rem;
+  max-width: 1.75rem;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+.step4-line-table .step3-th-name,
+.step4-line-table .step3-td-name {
+  width: 8%;
+  max-width: none;
+}
+
+.step4-line-table .step3-th-date,
+.step4-line-table .step3-td-date {
+  width: 12%;
+  min-width: 8.75rem;
+}
+
+.step4-line-table .step3-th-group,
+.step4-line-table .step3-td-group {
+  width: 6%;
+  min-width: 4rem;
+}
+
+.step4-line-table .step3-th-scaleup,
+.step4-line-table .step3-td-scaleup {
+  width: 8%;
+  min-width: 6.5rem;
+  text-align: center;
+}
+
+.step4-line-table .step3-th-complexity,
+.step4-line-table .step3-td-complexity {
+  width: 9%;
+  min-width: 5.5rem;
+}
+
+.step4-line-table .step3-th-glycerol,
+.step4-line-table .step3-td-glycerol {
+  width: 10%;
+  min-width: 7.5rem;
+  text-align: center;
+}
+
+.step4-line-table .step3-th-addl,
+.step4-line-table .step3-td-addl {
+  width: 8%;
+  min-width: 5rem;
+  text-align: center;
+}
+
+.step4-line-table .step3-th-price,
+.step4-line-table .step3-td-price {
+  width: 9%;
+  min-width: 5.5rem;
+  text-align: right;
+}
+
+/* Scale up hidden — redistribute scale-up column space */
+.step4-line-table.step4-line-table--no-scaleup .step3-th-name,
+.step4-line-table.step4-line-table--no-scaleup .step3-td-name {
+  width: 9%;
+}
+
+.step4-line-table.step4-line-table--no-scaleup .step3-th-date,
+.step4-line-table.step4-line-table--no-scaleup .step3-td-date {
+  width: 13%;
+}
+
+.step4-line-table.step4-line-table--no-scaleup .step3-th-group,
+.step4-line-table.step4-line-table--no-scaleup .step3-td-group {
+  width: 7%;
+}
+
+.step4-line-table.step4-line-table--no-scaleup .step3-th-complexity,
+.step4-line-table.step4-line-table--no-scaleup .step3-td-complexity {
+  width: 10%;
+}
+
+.step4-line-table.step4-line-table--no-scaleup .step3-th-glycerol,
+.step4-line-table.step4-line-table--no-scaleup .step3-td-glycerol {
+  width: 11%;
+}
+
+.step4-line-table.step4-line-table--no-scaleup .step3-th-addl,
+.step4-line-table.step4-line-table--no-scaleup .step3-td-addl {
+  width: 9%;
+}
+
+.step4-line-table.step4-line-table--no-scaleup .step3-th-price,
+.step4-line-table.step4-line-table--no-scaleup .step3-td-price {
+  width: 10%;
+}
+
+/* Table / modal dropdowns (vector, scale-up) */
+.step3-inline-combobox {
+  --slds-c-input-text-font-size: 0.875rem;
+  --sds-c-input-text-font-size: 0.875rem;
+  --slds-c-input-line-height: 1.35;
+  --sds-c-input-line-height: 1.35;
+  --slds-c-input-sizing-min-height: 2rem;
+  --sds-c-input-sizing-min-height: 2rem;
+  --slds-c-input-spacing-inline-start: 0.65rem;
+  --sds-c-input-spacing-inline-start: 0.65rem;
+  --slds-c-input-spacing-inline-end: 1.75rem;
+  --sds-c-input-spacing-inline-end: 1.75rem;
+  --slds-c-input-radius-border: 0.45rem;
+  --sds-c-input-radius-border: 0.45rem;
+  --slds-c-input-color-border: #d8d8d8;
+  --sds-c-input-color-border: #d8d8d8;
+  --slds-c-input-color-background: #ffffff;
+  --sds-c-input-color-background: #ffffff;
+  --slds-c-input-text-color: #1c1c1c;
+  --sds-c-input-text-color: #1c1c1c;
+
+  --slds-c-listbox-font-size: 0.875rem;
+  --sds-c-listbox-font-size: 0.875rem;
+  --slds-c-listbox-option-font-size: 0.875rem;
+  --sds-c-listbox-option-font-size: 0.875rem;
+  --slds-c-listbox-option-text-font-size: 0.875rem;
+  --sds-c-listbox-option-text-font-size: 0.875rem;
+  --slds-c-listbox-option-line-height: 1.35;
+  --sds-c-listbox-option-line-height: 1.35;
+
+  --slds-c-button-font-size: 0.875rem;
+  --sds-c-button-font-size: 0.875rem;
+  --slds-c-button-line-height: 1.35;
+  --sds-c-button-line-height: 1.35;
+  --slds-c-button-radius-border: 0.45rem;
+  --sds-c-button-radius-border: 0.45rem;
+  --slds-c-button-color-border: #d8d8d8;
+  --sds-c-button-color-border: #d8d8d8;
+  --slds-c-button-color-background: #ffffff;
+  --sds-c-button-color-background: #ffffff;
+  --slds-c-button-text-color: #1c1c1c;
+  --sds-c-button-text-color: #1c1c1c;
+
+  --lwc-fontSize2: 0.875rem;
+  --lwc-fontSize3: 0.875rem;
+}
+
+.step3-inline-combobox,
+.step3-inline-select {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* Step 3 vector column — fit cell width; label truncates via abtCustomSelect */
+.step3-vector-select {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.step3-delete-icon {
+  color: #999;
+}
+
+.step3-empty {
+  text-align: center;
+  color: #999;
+  padding: 32px 0;
+  font-size: 0.9rem;
+}
+
+.step3-footer-left {
+  margin-top: 12px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   STEP 4: Pricing & Delivery
+   ═══════════════════════════════════════════════════════════════════════ */
+.step4-body {
+  padding-bottom: 8px;
+}
+
+/* XD: left = step line + instruction (8px gap); right = packaging label + combobox tight stack */
+.step4-header-band {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px 24px;
+  margin-bottom: 6px;
+  position: relative;
+  overflow: visible;
+}
+
+.step4-header-band:has(.step4-bulk-action-slot--open) {
+  z-index: 400;
+}
+
+.step4-left-stack {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.step4-left-stack .step3-subtitle {
+  margin: 0;
+}
+
+.step4-step-label {
+  flex: none;
+  min-width: 0;
+}
+
+.step4-packaging-column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  flex-shrink: 0;
+  text-align: left;
+}
+
+.step4-packaging-label {
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: #1c1c1c;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  text-align: left;
+}
+
+/* Packaging type — shadow on abtCustomSelect trigger */
+.step4-packaging-select-wrap {
+  display: block;
+}
+
+.step4-packaging-select {
+  display: block;
+  width: 11.5rem;
+  min-width: 9.5rem;
+}
+
+.step4-price {
+  font-weight: 700;
+  color: #222;
+}
+
+.step4-footer-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  margin-top: 12px;
+}
+
+.quote-download-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.step4-totals {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 24px;
+  align-items: center;
+  font-size: 0.85rem;
+  margin-left: auto;
+}
+
+.step4-total-item {
+  color: #555;
+}
+
+.step4-grand-total {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #222;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   EDIT SEQUENCE MODAL (popup overlay)
+   ═══════════════════════════════════════════════════════════════════════ */
+.manual-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 32px 16px;
+  box-sizing: border-box;
+  z-index: 9100;
+}
+
+.manual-modal-container {
+  background: #fff;
+  border-radius: 10px;
+  width: 1100px;
+  max-width: 100%;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+  overflow: visible;
+}
+
+.manual-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  padding: 18px 24px 10px 24px;
+}
+
+.manual-modal-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #222;
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.manual-modal-body {
+  padding: 0 24px 18px 24px;
+  overflow: visible;
+}
+
+.manual-fields-row {
+  display: flex;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+.manual-field-block {
+  flex: 0 1 320px;
+  max-width: 360px;
+}
+
+.manual-field-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+.manual-field-required {
+  color: #e74c3c;
+}
+
+.manual-sequence-block {
+  margin-top: 4px;
+}
+
+.manual-sequence-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.manual-char-count {
+  font-size: 0.82rem;
+  color: #888;
+}
+
+.manual-sequence-textarea {
+  width: 100%;
+  min-height: 160px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 12px;
+  font-family: monospace;
+  font-size: 0.85rem;
+  resize: vertical;
+  line-height: 1.6;
+  color: #333;
+  box-sizing: border-box;
+}
+
+.manual-sequence-textarea--error {
+  border-color: #e74c3c;
+}
+
+.manual-error-text {
+  color: #e74c3c;
+  font-size: 0.8rem;
+  margin-top: 4px;
+}
+
+.manual-modal-actions {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.manual-modal-actions .manual-cancel-btn,
+.manual-modal-actions .manual-save-btn {
+  min-width: 7.5rem;
+  min-height: 2.75rem;
+  padding: 0.7rem 1.6rem;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.manual-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  padding: 12px 24px;
+  border-top: 1px solid #e5e5e5;
+  gap: 10px;
+}
+
+.manual-cancel-btn {
+  padding: 10px 22px;
+  background: #fff;
+  color: #222;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: 1px solid #707070;
+  border-radius: 6px;
+  cursor: pointer;
+  min-width: 100px;
+}
+
+.manual-cancel-btn:hover {
+  background: #f7f7f7;
+}
+
+.manual-save-btn {
+  padding: 10px 24px;
+  background: #009add;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: none;
+  border-radius: 6px;
+  min-width: 90px;
+  cursor: pointer;
+}
+
+.manual-save-btn:hover {
+  background: #0089c6;
+}
+
+.manual-save-btn:disabled {
+  background: #009add;
+  opacity: 0.45;
+  color: #fff;
+  cursor: not-allowed;
+}
+
+/* ─── Column header tooltips (XD: #EEEEEF fill, 1px border, 5px blur shadow) ─ */
+.step3-th-tooltip {
+  overflow: visible;
+  position: relative;
+}
+
+.quote-th-tooltip-wrap {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  cursor: help;
+  outline: none;
+}
+
+.quote-th-tooltip-label {
+  display: block;
+  white-space: normal;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.step3-th-tooltip:has(.quote-th-tooltip-wrap:hover),
+.step3-th-tooltip:has(.quote-th-tooltip-wrap:focus-within) {
+  z-index: 10050;
+}
+
+.quote-th-tooltip-popover {
+  display: none;
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10051;
+  width: 280px;
+  background: #eeeeef;
+  color: #1c1c1c;
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.45;
+  padding: 14px 16px;
+  border-radius: 6px;
+  border: 1px solid #c4c4c4;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.22);
+  text-align: left;
+  white-space: normal;
+}
+
+.quote-th-tooltip-popover--wide {
+  width: 340px;
+}
+
+.quote-th-tooltip-body p {
+  margin: 0 0 10px;
+}
+
+.quote-th-tooltip-body p:last-child {
+  margin-bottom: 0;
+}
+
+.quote-th-tooltip-body strong {
+  font-weight: 700;
+}
+
+.quote-th-tooltip-arrow {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  margin-left: -6px;
+  background: #eeeeef;
+  border-left: 1px solid #c4c4c4;
+  border-top: 1px solid #c4c4c4;
+  transform: rotate(45deg);
+}
+
+.quote-th-tooltip-wrap:hover .quote-th-tooltip-popover,
+.quote-th-tooltip-wrap:focus .quote-th-tooltip-popover,
+.quote-th-tooltip-wrap:focus-within .quote-th-tooltip-popover {
+  display: block;
+}
+
+.step3-th-vector-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  max-width: 100%;
+}
+
+.quote-th-tooltip-warning-icon {
+  flex-shrink: 0;
+}
+
+.quote-th-reflex-warning-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.quote-th-tooltip-warning-icon--header {
+  --slds-c-icon-color-foreground-default: #ee5c42;
+  --slds-c-icon-color-foreground: #ee5c42;
+  --lwc-colorTextIconDefault: #ee5c42;
+  color: #ee5c42;
+}
+
+.step3-reflex-header-tooltip {
+  display: inline-flex;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+.step3-reflex-header-tooltip .quote-th-tooltip-popover {
+  left: 0;
+  transform: none;
+}
+
+.step3-reflex-header-tooltip .quote-th-tooltip-arrow {
+  left: 0.75rem;
+  margin-left: 0;
+}
+
+.step3-table thead {
+  position: relative;
+  z-index: 45;
+}
+
+/* Narrow viewports — fit table in width (no horizontal scroll); tooltips open upward */
+@media (max-width: 960px) {
+  .quote-page .step3-table-wrap {
+    overflow: visible;
+  }
+
+  .step3-body .step3-table,
+  .step4-body .step4-line-table {
+    min-width: 0;
+    font-size: 0.75rem;
+  }
+
+  .step3-body .step3-th,
+  .step3-body .step3-td,
+  .step4-line-table .step3-th,
+  .step4-line-table .step3-td {
+    padding: 6px 5px;
+  }
+  .step3-body .step3-th-num,
+  .step3-body .step3-td-num {
+    min-width: 4.75rem;
+  }
+
+  .step3-body .step3-th-toxic,
+  .step3-body .step3-td-toxic,
+  .step3-body .step3-table--no-vector .step3-th-toxic,
+  .step3-body .step3-table--no-vector .step3-td-toxic {
+    min-width: 5.25rem;
+  }
+
+  .step4-line-table .step3-th-date,
+  .step4-line-table .step3-td-date {
+    min-width: 7.5rem;
+    width: 11%;
+  }
+
+  .step4-line-table .step3-th-glycerol,
+  .step4-line-table .step3-td-glycerol {
+    min-width: 6.5rem;
+    width: 9%;
+  }
+
+  .step4-line-table .step3-th-scaleup,
+  .step4-line-table .step3-td-scaleup {
+    min-width: 5rem;
+    width: 8%;
+  }
+
+  .step4-line-table .step3-th-complexity,
+  .step4-line-table .step3-td-complexity {
+    min-width: 4.75rem;
+    width: 9%;
+  }
+
+  .step3-th-tooltip .quote-th-tooltip-popover {
+    top: auto;
+    bottom: calc(100% + 8px);
+    left: auto;
+    right: 0;
+    transform: none;
+    width: min(280px, calc(100vw - 2.5rem));
+    max-width: 280px;
+  }
+
+  .step3-th-tooltip .quote-th-tooltip-popover--wide {
+    width: min(300px, calc(100vw - 2.5rem));
+    max-width: 300px;
+  }
+
+  .step3-th-tooltip .quote-th-tooltip-arrow {
+    top: auto;
+    bottom: -6px;
+    left: auto;
+    right: 1rem;
+    margin-left: 0;
+    transform: rotate(225deg);
+  }
+
+  .step3-reflex-header-tooltip .quote-th-tooltip-popover {
+    left: auto;
+    right: 0;
+    transform: none;
+  }
+
+  .step3-reflex-header-tooltip .quote-th-tooltip-arrow {
+    left: auto;
+    right: 1rem;
+  }
+
+  .step3-body .step3-th-feasibility,
+  .step3-body .step3-td-feasibility,
+  .step3-body .step3-table--no-vector .step3-th-feasibility,
+  .step3-body .step3-table--no-vector .step3-td-feasibility {
+    min-width: 0;
+    width: 11%;
+  }
+}
+.codon-step3-warning,
+.codon-step3-failures {
+  margin: 0.75rem 0;
+  padding: 0.75rem;
+  border-radius: 0.25rem;
+}
+
+.codon-step3-warning {
+  border: 1px solid #dd7a01;
+  background: #fff8e6;
+}
+
+.codon-step3-failures {
+  border: 1px solid #c23934;
+  background: #fff5f5;
+  color: #8e030f;
+}
+
+.codon-step3-warning p,
+.codon-step3-failures p {
+  margin: 0.25rem 0 0;
+}

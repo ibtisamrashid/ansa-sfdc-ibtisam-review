@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>ABT_Shipping_Method__c</fullName>
+    <label>Shipping Method</label>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <controllingField>Shipping_Destination__c</controllingField>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>FedEx 2Day One Rate</fullName>
+                <default>false</default>
+                <label>FedEx 2 Day</label>
+            </value>
+            <value>
+                <fullName>FedEx Priority Overnight One Rate</fullName>
+                <default>false</default>
+                <label>FedEx Express Priority Overnight</label>
+            </value>
+            <value>
+                <fullName>FedEx International Priority</fullName>
+                <default>false</default>
+                <label>FedEx International Priority</label>
+            </value>
+            <value>
+                <fullName>FedEx Priority Overnight</fullName>
+                <default>false</default>
+                <label>FedEx Priority Overnight</label>
+            </value>
+            <value>
+                <fullName>FedEx Standard Overnight</fullName>
+                <default>false</default>
+                <label>FedEx Standard Overnight</label>
+            </value>
+            <value>
+                <fullName>UPS Next Day Air Saver</fullName>
+                <default>false</default>
+                <label>UPS Next Day Air Saver</label>
+            </value>
+            <value>
+                <fullName>UPS Next Day Air</fullName>
+                <default>false</default>
+                <label>UPS Next Day Air</label>
+            </value>
+            <value>
+                <fullName>UPS 2nd Day Air</fullName>
+                <default>false</default>
+                <label>UPS 2nd Day Air</label>
+            </value>
+            <value>
+                <fullName>FedEx Express Saver One Rate</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>FedEx Express Saver One Rate</label>
+            </value>
+        </valueSetDefinition>
+        <valueSettings>
+            <controllingFieldValue>Domestic</controllingFieldValue>
+            <controllingFieldValue>Both</controllingFieldValue>
+            <valueName>FedEx 2Day One Rate</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Domestic</controllingFieldValue>
+            <controllingFieldValue>Both</controllingFieldValue>
+            <valueName>FedEx Priority Overnight One Rate</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>International</controllingFieldValue>
+            <controllingFieldValue>Both</controllingFieldValue>
+            <controllingFieldValue>International - Cold Chain</controllingFieldValue>
+            <valueName>FedEx International Priority</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Both</controllingFieldValue>
+            <controllingFieldValue>IDT</controllingFieldValue>
+            <valueName>FedEx Standard Overnight</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Both</controllingFieldValue>
+            <valueName>UPS Next Day Air Saver</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Both</controllingFieldValue>
+            <valueName>UPS Next Day Air</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Both</controllingFieldValue>
+            <valueName>UPS 2nd Day Air</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Domestic - Cold Chain</controllingFieldValue>
+            <controllingFieldValue>IDT</controllingFieldValue>
+            <valueName>FedEx Priority Overnight</valueName>
+        </valueSettings>
+    </valueSet>
+</CustomField>

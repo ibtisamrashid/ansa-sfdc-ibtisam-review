@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <applicationVisibilities><application>Ansa_Reporting</application><visible>true</visible></applicationVisibilities>
+    <classAccesses><apexClass>ABT_DailyInvoiceReport</apexClass><enabled>true</enabled></classAccesses>
+    <customPermissions><enabled>true</enabled><name>ABT_View_Daily_Invoice_Report</name></customPermissions>
+    <description>Finance reporting access, including account-wide Stripe totals: live in production, sandbox in test orgs. Existing invoice record sharing still applies.</description>
+    <fieldPermissions><editable>false</editable><field>ABT_Invoice__c.ABT_Invoice_Date__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>false</editable><field>ABT_Invoice__c.ABT_Amount_Paid__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>false</editable><field>ABT_InvoiceLineItem__c.ABT_Description__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>false</editable><field>stripeGC__Stripe_Account__c.stripeGC__Is_Connected__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>false</editable><field>stripeGC__Stripe_Account__c.stripeGC__Is_Live_Mode__c</field><readable>true</readable></fieldPermissions>
+    <fieldPermissions><editable>false</editable><field>stripeGC__Stripe_Account__c.stripeGC__Stripe_Account_Id__c</field><readable>true</readable></fieldPermissions>
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>Daily Invoice Reporting</label>
+    <objectPermissions><allowCreate>false</allowCreate><allowDelete>false</allowDelete><allowEdit>false</allowEdit><allowRead>true</allowRead><modifyAllRecords>false</modifyAllRecords><object>ABT_Invoice__c</object><viewAllRecords>false</viewAllRecords></objectPermissions>
+    <objectPermissions><allowCreate>false</allowCreate><allowDelete>false</allowDelete><allowEdit>false</allowEdit><allowRead>true</allowRead><modifyAllRecords>false</modifyAllRecords><object>ABT_InvoiceLineItem__c</object><viewAllRecords>false</viewAllRecords></objectPermissions>
+    <objectPermissions><allowCreate>false</allowCreate><allowDelete>false</allowDelete><allowEdit>false</allowEdit><allowRead>true</allowRead><modifyAllRecords>false</modifyAllRecords><object>stripeGC__Stripe_Account__c</object><viewAllRecords>false</viewAllRecords></objectPermissions>
+    <tabSettings><tab>ABT_Daily_Invoice_Report</tab><visibility>Visible</visibility></tabSettings>
+</PermissionSet>

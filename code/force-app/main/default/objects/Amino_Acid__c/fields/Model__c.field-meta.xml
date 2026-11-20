@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Model__c</fullName>
+    <label>Model</label>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value><fullName>Trias</fullName><default>false</default><label>Trias</label></value>
+            <value><fullName>Codon_Transformer</fullName><default>false</default><label>Codon Transformer</label></value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

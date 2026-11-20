@@ -1,0 +1,124 @@
+{
+  "type": "sfdc_cms__trustedSites",
+  "title": "trustedSites",
+  "contentBody": {
+    "trustedSites": [
+      {
+        "isActive": true,
+        "source": "https://js.zi-scripts.com/zi-tag.js",
+        "sourceName": "Zoom Info"
+      },
+      {
+        "isActive": true,
+        "source": "https://js.zi-scripts.com/unified/v1/master/getSubscriptions",
+        "sourceName": "Zoom Info Subscriptions"
+      },
+      {
+        "isActive": true,
+        "source": "https://scout-cdn.salesloft.com/sl.js",
+        "sourceName": "scout-cdn.salesloft.com"
+      },
+      {
+        "isActive": true,
+        "source": "https://www.googletagmanager.com/gtag/js",
+        "sourceName": "www.googletagmanager.com"
+      },
+      {
+        "isActive": true,
+        "source": "https://td.doubleclick.net",
+        "sourceName": "Double Click"
+      },
+      {
+        "isActive": true,
+        "source": "https://*.googletagmanager.com",
+        "sourceName": "*.googletagmanager.com"
+      },
+      {
+        "isActive": true,
+        "source": "https://js.hs-scripts.com/21348032.js",
+        "sourceName": "Script 1"
+      },
+      {
+        "isActive": true,
+        "source": "https://js.hubspot.com/web-interactives-embed.js",
+        "sourceName": "Script 2"
+      },
+      {
+        "isActive": true,
+        "source": "https://js.hscollectedforms.net/collectedforms.js",
+        "sourceName": "Collected Form"
+      },
+      {
+        "isActive": true,
+        "source": "https://js.hs-banner.com/v2/21348032/banner.js",
+        "sourceName": "Banner"
+      },
+      {
+        "isActive": true,
+        "source": "https://forms.hscollectedforms.net/",
+        "sourceName": "Forms"
+      },
+      {
+        "isActive": true,
+        "source": "https://js.hs-analytics.net/analytics/1744845000000/21348032.js",
+        "sourceName": "Analytics"
+      },
+      {
+        "isActive": true,
+        "source": "https://js.hs-analytics.net/analytics/1753076400000/21348032.js",
+        "sourceName": "Analytics2"
+      },
+      {
+        "isActive": true,
+        "source": "https://js.hs-analytics.net/analytics/1759764900000/21348032.js",
+        "sourceName": "Analytics3"
+      },
+      {
+        "isActive": true,
+        "source": "https://js.usemessages.com/conversations-embed.js",
+        "sourceName": "Use Messages"
+      },
+      {
+        "isActive": true,
+        "source": "https://js.hs-analytics.net/analytics/1759765200000/21348032.js",
+        "sourceName": "Analytics4"
+      },
+      {
+        "isActive": true,
+        "source": "https://js.hs-analytics.net/analytics/1768348500000/21348032.js",
+        "sourceName": "Analytics5"
+      },
+      {
+        "isActive": true,
+        "source": "https://js.hs-analytics.net/analytics/",
+        "sourceName": "Analytics6"
+      },
+      {
+        "isActive": true,
+        "source": "https://googleads.g.doubleclick.net/pagead/viewthroughconversion/",
+        "sourceName": "Google Leads"
+      },
+      {
+        "isActive": true,
+        "source": "https://portal.ansabio.com",
+        "sourceName": "Portal Custom Domain"
+      },
+      {
+        "isActive": true,
+        "source": "https://ansabio.my.site.com",
+        "sourceName": "Salesforce Site Host"
+      },
+      {
+        "isActive": true,
+        "source": "https://ansabio--partial.sandbox.my.site.com",
+        "sourceName": "Partial Sandbox Site Host"
+      },
+      {
+        "isActive": true,
+        "source": "https://js.stripe.com",
+        "sourceName": "Stripe JS"
+      }
+    ]
+  },
+  "urlName": "trustedsites"
+}
